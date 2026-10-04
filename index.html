@@ -232,6 +232,12 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
 }
 
 /* ===== V3 phone layout ===== */
+.ver { margin: 0; text-align: center; font-family: var(--font-type); font-size: 0.74rem; color: var(--soft); }
+.sheet .say { border-color: var(--line); background: color-mix(in srgb, var(--fg) 9%, transparent); opacity: 0.8; transition: background 0.15s, border-color 0.15s; }
+.sheet .say .say-t b, .sheet .say .say-t span { color: var(--soft); }
+.sheet .say.live { border-color: var(--sun); border-width: 2.5px; background: color-mix(in srgb, var(--sun) 26%, var(--panel)); opacity: 1; box-shadow: 0 0 0 4px color-mix(in srgb, var(--sun) 35%, transparent); }
+.sheet .say.live .say-t b { color: var(--fg); }
+.sheet .say.live .say-t span { color: var(--fg); }
 html, body { height: 100%; }
 body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; background: var(--bg); }
 .app {
@@ -369,6 +375,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
+        <p class="ver" id="ver">v3.05 · built 2026-10-04 16:03 (EST)</p>
       </div>
     </div>
 
@@ -429,7 +436,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.05 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -1482,8 +1489,10 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     }
     return dp[n][m];
   }
-  function showSay(v) { $('say').hidden = !v; $('sheet').classList.toggle('reading', !!v); if (v) { try { $('sheet').scrollTop = $('sheet').scrollHeight; } catch (e) {} } }
+  function showSay(v) { $('say').hidden = !v; if (v) setSayLive(false); $('sheet').classList.toggle('reading', !!v); if (v) { try { $('sheet').scrollTop = $('sheet').scrollHeight; } catch (e) {} } }
+  function setSayLive(on) { $('say').classList.toggle('live', !!on); }
   function setListening() {
+    setSayLive(true);
     var el = $('sayState');
     el.textContent = '';
     var d = document.createElement('i'); d.className = 'dot';
@@ -1499,6 +1508,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     t.appendChild(s);
   }
   function stopListening() {
+    setSayLive(false);
     voice.gen++;
     voice.on = false;
     if (voice.rec) { try { voice.rec.abort(); } catch (e) {} voice.rec = null; }
@@ -1583,7 +1593,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     };
     rec.onend = function () {
       if (gen !== voice.gen) return;
-      voice.on = false;
+      voice.on = false; setSayLive(false);
       if (R.stage !== 'read' || voice.manual) return;
       if (!gotFinal) {
         voice.silent++;
@@ -1607,7 +1617,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     else if (err === 'unsupported') msg = '이 브라우저는 목소리 인식을 지원하지 않아요. (안드로이드는 Chrome, 아이폰은 Safari로 열어 보세요.) 지금은 읽은 뒤 "읽었어요!"를 눌러 주세요.';
     else if (err === 'network') msg = '인터넷에 연결되어 있지 않아서 목소리 인식이 안 돼요. 읽은 뒤 버튼을 눌러 주세요.';
     else if (err === 'off') msg = '마이크를 꺼 두었어요. 읽은 뒤 "읽었어요!"를 눌러 주세요.';
-    $('sayState').textContent = msg;
+    $('sayState').textContent = msg; setSayLive(true);
     $('btnSaid').hidden = false; $('btnSaid').disabled = true;
     $('btnMicRetry').hidden = !(SR && (err === 'not-allowed' || err === 'service-not-allowed' || err === 'audio-capture'));
     var o = R.opts[R.sel];
@@ -1643,7 +1653,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (micAsk === 'denied') { goManual('not-allowed'); return; }
     if (micAsk === 'off') { goManual('off'); return; }
     if (speakOn) {
-      $('sayState').textContent = '원어민 발음을 듣는 중이에요…';
+      $('sayState').textContent = '원어민 발음을 듣는 중이에요… (칸이 노랗게 바뀌면 따라 읽어요)';
       speak(o.en, listenSoon, function () { $('heard').textContent = '발음이 안 들리면 문장 옆 듣기 버튼을 눌러 보세요.'; });
     } else {
       startListening();
@@ -3041,7 +3051,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (!roundOpen || R.stage !== 'read') return;
     var o = R.opts[R.sel];
     if (!o || voice.manual) return;
-    $('sayState').textContent = '원어민 발음을 듣는 중이에요…';
+    $('sayState').textContent = '원어민 발음을 듣는 중이에요… (칸이 노랗게 바뀌면 따라 읽어요)';
     speak(o.en, listenSoon);
   }
   function togglePause() {
