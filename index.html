@@ -232,6 +232,14 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
 }
 
 /* ===== V3 phone layout ===== */
+.tip { position: absolute; inset: 0; z-index: 9; background: rgba(8, 14, 30, 0.35); touch-action: manipulation; }
+.tipbub { position: absolute; background: var(--panel); color: var(--fg); border: 2.5px solid var(--ui-edge); border-radius: 16px; padding: 12px 14px; display: grid; gap: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+.tipbub::after { content: ''; position: absolute; left: calc(var(--tail, 50%) - 10px); width: 18px; height: 18px; background: var(--panel); border: 2.5px solid var(--ui-edge); transform: rotate(45deg); }
+.tipbub.below::after { top: -11px; border-right: 0; border-bottom: 0; }
+.tipbub.above::after { bottom: -11px; border-left: 0; border-top: 0; }
+.tipbub b { font-family: var(--font-display); font-weight: 400; font-size: 1.15rem; }
+.tipbub p { margin: 0; font-size: 0.95rem; }
+.tipbub .go { font-size: 1rem; padding: 0.5em 0.9em; }
 #oTime { font-size: 1.05rem; line-height: 1.6; }
 .hudline { position: absolute; left: 0; right: 0; top: 3px; z-index: 3; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 8px; pointer-events: none; font-family: var(--font-type); font-weight: 700; font-size: 0.86rem; color: #fff; font-variant-numeric: tabular-nums;
   text-shadow: -1.5px -1.5px 0 var(--outline), 1.5px -1.5px 0 var(--outline), -1.5px 1.5px 0 var(--outline), 1.5px 1.5px 0 var(--outline), 0 2px 0 var(--outline); }
@@ -375,6 +383,13 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     <div class="hudline" id="hudline" hidden><span></span><span id="hudWave">WAVE 1</span><span id="hudTime">0:00.0</span></div>
     <div class="toast" id="toast" aria-live="polite"><div class="en"></div><div class="sub"></div></div>
 
+    <div class="tip" id="tip" hidden>
+      <div class="tipbub" id="tipBub" role="dialog" aria-live="polite">
+        <b id="tipTitle"></b><p id="tipText"></p>
+        <button class="go" id="btnTipOk" type="button">알겠어요!</button>
+      </div>
+    </div>
+
     <div class="ov" id="ovStart">
       <div class="card">
         <p class="eyebrow">영어 읽기 슈팅 게임 · 버전 3 (폰)</p>
@@ -391,7 +406,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.09 · built 2026-10-04 17:21 (EST)</p>
+        <p class="ver" id="ver">v3.10 · built 2026-10-04 17:54 (EST)</p>
       </div>
     </div>
 
@@ -463,6 +478,13 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         <div class="vb" id="vcBtns"><button data-v="40">작게</button><button data-v="70">보통</button><button data-v="100">크게</button></div>
         <button class="go alt" id="btnVcTest" type="button">🔊 문장 들어보기</button>
       </section>
+      <section class="vrow">
+        <div class="vt"><h3>발음 목소리</h3></div>
+        <p style="margin-bottom:6px">남자 목소리가 나오면 다른 목소리를 골라 "이 목소리 들어 보기"를 눌러 보세요. 고른 목소리는 기억해요.</p>
+        <select id="voiceSel" style="width:100%;font:inherit;font-size:0.9rem;padding:0.5em;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);color:var(--fg)"></select>
+        <p id="voiceNote" style="font-size:0.8rem;color:var(--soft);margin:4px 0 6px"></p>
+        <button class="go alt" id="btnVoiceTest" type="button" style="font-size:0.95rem;padding:0.5em 0.9em">🔊 이 목소리 들어 보기</button>
+      </section>
       <button class="go pclose-wide" id="btnVolClose2">닫고 계속하기</button>
     </div>
   </div>
@@ -473,7 +495,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.09 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.10 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -497,10 +519,10 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <section>
         <h3>무기 설명</h3>
         <ul class="wl">
-          <li style="--c:var(--wc1)"><b>총알 → 레이저</b> · 1~5단계는 총알이 1~5발, 6단계부터 레이저 빔, 10단계는 프리즘 레이저예요.</li>
-          <li style="--c:var(--wc2)"><b>미사일 → 유도 미사일</b> · 느리지만 세요. 6단계부터 적을 따라가고, 7단계부터 폭발이 커져요.</li>
-          <li style="--c:var(--wc3)"><b>방어막 → 공격 방어막</b> · 구체가 몸 주위를 돌며 총알을 막아요. 6단계부터 넓게 퍼지며 막고 끝에서 공격해요.</li>
-          <li style="--c:var(--wc4)"><b>드론 → 자율 드론</b> · 따라다니며 부채꼴로 쏴요. 6단계부터 알아서 날아다니고, 10단계는 쌍둥이 드론이에요.</li>
+          <li style="--c:var(--wc1)"><b>총알 → 레이저 → 천광 레이저</b> · 1~5단계는 총알이 1~5발, 6~9단계는 레이저 빔, 10단계는 천광 레이저예요.</li>
+          <li style="--c:var(--wc2)"><b>미사일 → 유도미사일 → 천무 미사일</b> · 느리지만 세요. 6단계부터 적을 따라가고, 7단계부터 폭발이 커지고, 10단계는 천무 미사일이에요.</li>
+          <li style="--c:var(--wc3)"><b>방어막 → APS → 아이언 돔</b> · 구체가 몸 주위를 돌며 총알을 막아요. 6단계부터 구체가 바깥으로 퍼져 나가고, 목표 거리에 닿으면 사라지지 않고 계속 돌면서 적을 공격해요.</li>
+          <li style="--c:var(--wc4)"><b>드론 → 자율드론 → 골든 윙</b> · 따라다니며 부채꼴로 쏴요. 6단계부터 알아서 날아다니고, 10단계는 골든 윙이에요.</li>
           <li style="--c:var(--wc8)"><b>폭발탄 → 소이탄 → 네이팜탄</b> · 1~5단계는 한 번 폭발, 6~9단계 소이탄은 땅을 태우고, 10단계 네이팜탄은 크게 타올라요.</li>
           <li style="--c:var(--wc5)"><b>광역 공격(모선)</b> · 두 무기 레벨의 평균으로 <b>자동</b>으로 커져요. 적 총알을 지우고 나중엔 포탑과 메가 빔으로 공격해요.</li>
           <li style="--c:var(--wc6)"><b>수리</b> · 하트를 하나 회복해요.</li>
@@ -508,13 +530,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </ul>
         <p style="margin-top:8px;font-size:0.82rem;color:var(--soft)">무기는 처음에 고른 <b>두 종류</b>만 키울 수 있어요. 위쪽 칸에 현재 무기와 레벨이 보여요.</p>
       </section>
-      <section>
-        <h3>발음 목소리</h3>
-        <p style="margin-bottom:6px">남자 목소리가 나오면 아래에서 다른 목소리를 골라 "들어 보기"를 눌러 보세요. 고른 목소리는 기억해요.</p>
-        <select id="voiceSel" style="width:100%;font:inherit;font-size:0.9rem;padding:0.5em;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);color:var(--fg)"></select>
-        <p id="voiceNote" style="font-size:0.8rem;color:var(--soft);margin:4px 0 6px"></p>
-        <button class="go alt" id="btnVoiceTest" type="button" style="font-size:0.95rem;padding:0.5em 0.9em">🔊 들어 보기</button>
-      </section>
+      <button class="go alt" id="btnTipReset" type="button" style="font-size:0.9rem;padding:0.5em 0.9em">💬 처음 설명 말풍선 다시 보기</button>
       <button class="go pclose-wide" id="btnPanelClose2">닫고 계속하기</button>
     </div>
   </div>
@@ -1150,11 +1166,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     [/google us english/i, 100], [/microsoft aria/i, 96], [/microsoft jenny/i, 94], [/ava.*(premium|enhanced)/i, 92],
     [/\bava\b/i, 88], [/\ballison\b/i, 84], [/\bsamantha\b/i, 80], [/\bsusan\b/i, 72], [/zira/i, 70], [/\bnicky\b/i, 62], [/joanna|salli|kendra|kimberly/i, 60]
   ];
-  var NOT_VOICE = /albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|ralph|junior|daniel|alex\b|tom\b|david|mark\b|guy\b|eddy|reed|rocko|grandpa|\bmale\b/i;
+  var NOT_VOICE = /espeak|kathy|princess|agnes|vicki|victoria|bruce|novelty|robot|albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|ralph|junior|daniel|alex\b|tom\b|david|mark\b|guy\b|eddy|reed|rocko|grandpa|\bmale\b/i;
   /* Android Google voices are all named "English United States"; their codes tell them apart (iol/iom/tpd are male voices) */
   var MALE_CODE = /x-(iol|iom|tpd|ioj|ial)\b/i, FEMALE_CODE = /x-(tpf|sfg|iob|iog|tpc)\b/i, VOICE_KEY = 'sunnySkyV3Voice';
   function vkey(v) { return (v.name || '') + ' ' + (v.voiceURI || ''); }
-  function enVoices() { try { return speechSynthesis.getVoices().filter(function (v) { return /^en/i.test(v.lang); }); } catch (e) { return []; } }
+  function enVoices() { try { return speechSynthesis.getVoices().filter(function (v) { return /^en/i.test(v.lang) && !NOT_VOICE.test(vkey(v)); }); } catch (e) { return []; } }
   function pickVoice() {
     try {
       var vs = speechSynthesis.getVoices(), best = null, bs = -1, saved = '';
@@ -1239,7 +1255,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     8: { ko: '폭발탄', en: 'Explosive Bomb', evo: '소이탄' }
   };
   /* weapon 8 changes its name with its level: 1-5 Explosive Bomb, 6-9 Incendiary Bomb, 10 Napalm Bomb */
-  function wname(t, L) { return t === 8 ? (L <= 5 ? '폭발탄' : L <= 9 ? '소이탄' : '네이팜탄') : WT[t].ko; }
+  var WN = { 1: ['총알', '레이저', '천광 레이저'], 2: ['미사일', '유도미사일', '천무 미사일'], 3: ['방어막', 'APS', '아이언 돔'], 4: ['드론', '자율드론', '골든 윙'] };
+  function wname(t, L) {
+    if (t === 8) return L <= 5 ? '폭발탄' : L <= 9 ? '소이탄' : '네이팜탄';
+    return WN[t] ? WN[t][L <= 5 ? 0 : L <= 9 ? 1 : 2] : WT[t].ko;
+  }
   var EVO = [null,
     { n: 'FALCON', ko: '팔콘', d: '날렵한 날개 · 최대 하트 +1 · 기본 총 2발 (살짝 부채꼴)' },
     { n: 'RAPTOR', ko: '랩터', d: '쌍발 엔진 · 기본 총 3발 · 위력 1.5배 · 무적 시간 늘어남' },
@@ -1285,26 +1305,26 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (t === 1) {
       if (L <= 5) return '총알 ' + W1.n[L - 1] + '발을 동시에 쏴요';
       if (L === 6) return '레이저로 진화! 빔 ' + W1.beams[0] + '줄기';
-      if (L === 10) return '프리즘 레이저! 빔 7줄기와 굵은 중심 빔';
+      if (L === 10) return '천광 레이저! 빔 7줄기와 굵은 중심 빔';
       return '레이저 빔 ' + W1.beams[L - 6] + '줄기';
     }
     if (t === 2) {
       if (L <= 5) return '미사일 ' + W2.n[L - 1] + '발 · 위력 ' + W2.dmg[L - 1];
-      if (L === 6) return '유도 미사일로 진화! ' + W2.n[5] + '발이 적을 따라가요';
-      if (L === 10) return '미사일 폭풍! 8발이 큰 폭발을 일으켜요';
-      return '유도 미사일 ' + W2.n[L - 1] + '발 · 폭발 범위 + 위력 ' + W2.dmg[L - 1];
+      if (L === 6) return '유도미사일로 진화! ' + W2.n[5] + '발이 적을 따라가요';
+      if (L === 10) return '천무 미사일! 8발이 큰 폭발을 일으켜요';
+      return '유도미사일 ' + W2.n[L - 1] + '발 · 폭발 범위 + 위력 ' + W2.dmg[L - 1];
     }
     if (t === 3) {
       if (L <= 5) return '구체 ' + L + '개가 몸 주위를 돌며 총알을 막아요';
-      if (L === 6) return '공격 방어막으로 진화! 구체 5개가 소용돌이처럼 퍼지며 막고, 끝에 닿으면 공격해요';
-      if (L === 10) return '수호 소용돌이! 거리 290 끝에서 번개 구체가 공격해요';
-      return '구체 5개가 거리 ' + ORBS[L - 6].D + '까지 퍼지며 막아요 · 도착하면 공격만 하고 사라져요 · 공격력 ' + ORB_DPS[L - 6];
+      if (L === 6) return 'APS로 진화! 구체 5개가 퍼져 나가며 막고, 목표 거리에 닿으면 계속 돌면서 공격해요';
+      if (L === 10) return '아이언 돔! 거리 290에서 번개 구체들이 계속 돌며 공격해요';
+      return '구체 5개가 거리 ' + ORBS[L - 6].D + '까지 퍼지며 막아요 · 도착하면 사라지지 않고 계속 돌며 공격해요 · 공격력 ' + ORB_DPS[L - 6];
     }
     if (t === 4) {
       if (L <= 5) return '드론 ' + W4.n[L - 1] + '기가 따라다니며 부채꼴로 사격해요';
-      if (L === 6) return '자율 드론으로 진화! ' + W4.n[5] + '기가 알아서 날아다녀요';
-      if (L === 10) return '쌍둥이 드론! 5기가 각각 2발씩 사격해요';
-      return '자율 드론 ' + W4.n[L - 1] + '기 · 위력 ' + W4.dmg[L - 1];
+      if (L === 6) return '자율드론으로 진화! ' + W4.n[5] + '기가 알아서 날아다녀요';
+      if (L === 10) return '골든 윙! 5기가 각각 2발씩 사격해요';
+      return '자율드론 ' + W4.n[L - 1] + '기 · 위력 ' + W4.dmg[L - 1];
     }
     if (t === 5) {
       if (L <= 5) return '모선이 지나가며 적 총알을 지워요 · 폭 ' + W5.w[L - 1];
@@ -1316,8 +1336,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     return '하트를 하나 회복해요';
   }
   var BIG = {
-    1: ['LASER!', '', '', '', 'PRISM LASER'], 2: ['HOMING!', '', '', '', 'MISSILE STORM'],
-    3: ['SPIKE ORBS', '', '', '', 'GUARDIAN ORBIT'], 4: ['FREE DRONES', '', '', '', 'DRONE LEGION'],
+    1: ['LASER!', '', '', '', 'HEAVENLY LASER'], 2: ['HOMING!', '', '', '', 'HEAVEN MISSILE'],
+    3: ['APS ACTIVE', '', '', '', 'IRON DOME'], 4: ['FREE DRONES', '', '', '', 'GOLDEN WING'],
     5: ['WARSHIP', '', '', '', 'DREADNOUGHT'], 8: ['INCENDIARY BOMB', '', '', '', 'NAPALM BOMB']
   };
   function bigName(t, L) {
@@ -1340,7 +1360,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     2: { hp: 1.9, def: 0.10, cnt: 1.3, maxN: 32, sp: 1.25, fi: 0.82, fdef: 0.55, name: '매우 어려움' }
   };
   var FINAL_HP = 22000;
-  var GOAL_FIRST = 400, GOAL_STEP = 900, SECS_PER_ROUND = 30, GOAL_MAX = 30000, confirmOpen = false, roundOpen = false, panelOpen = false, panelPrev = '', drag = null, launching = false;
+  var GOAL_FIRST = 400, GOAL_STEP = 900, SECS_PER_ROUND = 30, GOAL_MAX = 30000, confirmOpen = false, tipOpen = false, tipObj = null, roundOpen = false, panelOpen = false, panelPrev = '', drag = null, launching = false;
   /* ---------- background zones: 0 ground, 1 sea, 2 sky, 3 space ---------- */
   var BG = { p: 0, scr: 0, kind: 0 };
   var ZONES = ['지상', '바다', '하늘', '우주'];
@@ -1420,7 +1440,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     d.className = 'wchip filled';
     d.style.setProperty('--c', 'var(--wc' + t + ')');
     var b = document.createElement('b');
-    var nm = document.createElement('span'); nm.textContent = t === 8 ? wname(8, L) : (L >= 6 ? WT[t].evo : WT[t].ko);
+    var nm = document.createElement('span'); nm.textContent = wname(t, L);
     var lv = document.createElement('em'); lv.textContent = 'Lv ' + L;
     b.appendChild(nm); b.appendChild(lv);
     var pips = document.createElement('div'); pips.className = 'pips';
@@ -1900,7 +1920,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         }
       });
     } else {
-      var q = L - 6, Q = ORBS[q], oR = 12 + q * 0.8, hold = Math.PI / Q.w, life = Q.tout + hold;
+      var q = L - 6, Q = ORBS[q], oR = 12 + q * 0.8, cap = L === 10 ? 20 : 15; /* arrived orbs stay and keep circling (oldest ones make room beyond the cap) */
       if (G.orbLv !== L) { G.orbLv = L; G.orbs = []; G.orbNext = 0; }
       G.orbNext -= dt;
       while (G.orbNext <= 0) {
@@ -1909,11 +1929,12 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         G.orbNext += Q.tout;
       }
       G.orbs.forEach(function (o) { o.age += dt; });
-      G.orbs = G.orbs.filter(function (o) { return o.age < life; });
+      var arrivedN = 0; G.orbs.forEach(function (o) { if (o.age >= Q.tout) arrivedN++; });
+      for (var oi2 = 0; arrivedN > cap && oi2 < G.orbs.length;) { if (G.orbs[oi2].age >= Q.tout) { G.orbs.splice(oi2, 1); arrivedN--; } else oi2++; }
       G.orbs.forEach(function (o) {
         var out = o.age < Q.tout, r = out ? 40 + (Q.D - 40) * (o.age / Q.tout) : Q.D, a = o.a0 + Q.w * o.age;
-        var al = Math.min(1, o.age / 0.15, (life - o.age) / 0.3);
-        G.orbPos.push({ x: G.px + Math.cos(a) * r, y: G.py + Math.sin(a) * r, r: oR, atk: !out, def: out, dps: ORB_DPS[q], a: a, ring: o.c, rr: r, al: Math.max(0.05, al) * (out ? 1 : 0.7), arrived: !out });
+        var al = Math.min(1, o.age / 0.15);
+        G.orbPos.push({ x: G.px + Math.cos(a) * r, y: G.py + Math.sin(a) * r, r: oR, atk: !out, def: out, dps: ORB_DPS[q], a: a, ring: o.c, rr: r, al: Math.max(0.05, al) * (out ? 1 : 0.95), arrived: !out });
       });
     }
     G.orbTick -= dt;
@@ -2157,6 +2178,32 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (type === 'boss') { var be = G.enemies[G.enemies.length - 1]; be.bwave = G.wave; be.bname = BOSS_NAMES[BG.kind][G.bosses % 3]; }
   }
   var EARLY_WAVES = 8; /* waves 1-8 = up to and including the 2nd boss wave */
+  var TIPS = {
+    turret: ['고정포탑', '제거할 수 없어요! 비행기가 부딪히면 체력이 한 칸 줄어요. 가까이 가면 붉은 경고 빛이 나타나요.'],
+    star: ['특별한 별이 떴어요!', '먹어보세요! 별을 먹으면 바로 업그레이드 문장이 나와요.']
+  };
+  var tipSeen = {};
+  try { tipSeen = JSON.parse(localStorage.getItem('sunnySkyV3Tips') || '{}') || {}; } catch (e) {}
+  function maybeTip() {
+    if (tipOpen || roundOpen || G.ending) return;
+    var kind = null, obj = null;
+    if (!tipSeen.turret) { G.turrets.forEach(function (t) { if (!obj && t.y > 30) { kind = 'turret'; obj = t; } }); }
+    if (!obj && !tipSeen.star) { G.items.forEach(function (it) { if (!obj && it.y > 30) { kind = 'star'; obj = it; } }); }
+    if (!obj) return;
+    tipSeen[kind] = 1; try { localStorage.setItem('sunnySkyV3Tips', JSON.stringify(tipSeen)); } catch (e) {}
+    tipOpen = true; tipObj = obj; keys = {}; drag = null;
+    $('tipTitle').textContent = (kind === 'star' ? '⭐ ' : '⚠ ') + TIPS[kind][0]; $('tipText').textContent = TIPS[kind][1];
+    $('tip').hidden = false;
+    var bub = $('tipBub'), sr = $('stage').getBoundingClientRect(), r = cv.getBoundingClientRect();
+    var bw = Math.min(300, sr.width - 24); bub.style.width = bw + 'px';
+    var ox = r.left - sr.left + obj.x / W * r.width, oy = r.top - sr.top + obj.y / H * r.height;
+    var left = clamp(ox - bw / 2, 12, sr.width - bw - 12), bh = bub.offsetHeight, below = oy + 48 + bh < sr.height - 8;
+    bub.style.left = left + 'px'; bub.style.top = (below ? oy + 48 : Math.max(8, oy - 48 - bh)) + 'px';
+    bub.classList.toggle('below', below); bub.classList.toggle('above', !below);
+    bub.style.setProperty('--tail', clamp(ox - left, 22, bw - 22) + 'px');
+    tone(700, 0.12, 'triangle', 0.05);
+  }
+  function closeTip() { if (!tipOpen) return; tipOpen = false; tipObj = null; $('tip').hidden = true; }
   function startWave() {
     G.wave++; G.waveT = 0; G.waveClear = false;
     var w = G.wave, q = [], T = diffT();
@@ -2297,6 +2344,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     }
   }
   function update(dt) {
+    if (tipOpen) return;
     var sp = 320;
     if (keys.ArrowLeft) G.tx -= sp * dt;
     if (keys.ArrowRight) G.tx += sp * dt;
@@ -2340,6 +2388,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (G.waveClear && G.wave === 0 && R.stage === 'none') { /* wait for the first round to be created */ }
     if (G.waveClear && !G.finalMode) { G.nextWave -= dt; if (G.nextWave <= 0) startWave(); }
     G.enemies.forEach(function (e) { if (!e.dead) enemyAI(e, dt); });
+    maybeTip();
     /* ground turrets drift down with the ground and leave the screen; touching one costs a heart */
     G.turrets.forEach(function (t) {
       t.y += 55 * dt; t.age += dt;
@@ -2350,7 +2399,13 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     G.turrets = G.turrets.filter(function (t) { return !t.dead; });
     /* shining star: grab it -> a sentence round opens right away (your score progress is kept) */
     G.items.forEach(function (it) {
-      it.age += dt; it.y += 85 * dt; it.x += Math.sin(it.age * 2.2 + it.ph) * 28 * dt;
+      it.age += dt;
+      if (it.y < H / 3) { it.y += 85 * dt; it.x += Math.sin(it.age * 2.2 + it.ph) * 28 * dt; }
+      else { /* past the first third of the screen: twice as fast and much jumpier */
+        it.y += 170 * dt;
+        it.x += (Math.sin(it.age * 4.6 + it.ph) * 130 + Math.sin(it.age * 9.1 + it.ph * 2) * 80) * dt;
+        it.x = clamp(it.x, 22, W - 22);
+      }
       if (it.y > H + 40) { it.dead = true; return; }
       var ix = it.x - G.px, iy = it.y - G.py;
       if (ix * ix + iy * iy < 34 * 34 && !roundOpen && !G.ending) {
@@ -2553,6 +2608,23 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   function drawTurret(t) {
     ctx.save(); ctx.translate(t.x, t.y);
     ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.strokeStyle = C.outline;
+    var fd = Math.hypot(G.px - t.x, G.py - t.y);
+    if (fd < 112) { /* warning field when the plane gets close (about 100) */
+      var fk = 1 - clamp(fd / 112, 0, 1), fa = 0.3 + 0.55 * fk, tt = performance.now() / 1000;
+      ctx.save(); ctx.globalAlpha = fa;
+      var fg = ctx.createRadialGradient(0, 0, 20, 0, 0, 100); fg.addColorStop(0, 'rgba(255,80,60,0)'); fg.addColorStop(0.7, 'rgba(255,90,60,0.18)'); fg.addColorStop(1, 'rgba(255,120,60,0.42)');
+      ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(0, 0, 100, 0, TAU); ctx.fill();
+      ctx.setLineDash([7, 6]); ctx.lineDashOffset = -tt * 30; ctx.lineWidth = 2; ctx.strokeStyle = '#ff6a45'; ctx.beginPath(); ctx.arc(0, 0, 99, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+      for (var pi = 0; pi < 3; pi++) { var ph = (tt * 0.9 + pi / 3) % 1; ctx.globalAlpha = fa * (1 - ph); ctx.lineWidth = 2.5; ctx.strokeStyle = '#ffb347'; ctx.beginPath(); ctx.arc(0, 0, 26 + 72 * ph, 0, TAU); ctx.stroke(); }
+      ctx.globalAlpha = fa; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      for (var li = 0; li < 6; li++) {
+        var la = Math.random() * TAU, lr = 28, lx = Math.cos(la) * lr, ly = Math.sin(la) * lr;
+        ctx.beginPath(); ctx.moveTo(lx, ly);
+        for (var lj = 1; lj <= 4; lj++) { lr += 12 + Math.random() * 8; var ja = la + (Math.random() - 0.5) * 0.5; ctx.lineTo(Math.cos(ja) * lr, Math.sin(ja) * lr); if (lr > 92) break; }
+        ctx.strokeStyle = '#fff3a8'; ctx.lineWidth = 1.8; ctx.stroke();
+      }
+      ctx.restore();
+    }
     ctx.beginPath(); ctx.ellipse(3, 6, 25, 19, 0, 0, TAU); ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.fill();
     ctx.beginPath(); for (var q = 0; q < 8; q++) { var a = q / 8 * TAU + TAU / 16; ctx.lineTo(Math.cos(a) * 24, Math.sin(a) * 24); } ctx.closePath();
     ctx.fillStyle = '#6b7488'; ctx.fill(); ctx.stroke();
@@ -3036,6 +3108,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     G.turrets.forEach(drawTurret);
     G.enemies.forEach(drawEnemy);
     G.items.forEach(drawStar);
+    if (tipOpen && tipObj) { var hp = 1 + Math.sin(performance.now() / 160) * 0.12; ctx.save(); ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.arc(tipObj.x, tipObj.y, 38 * hp, 0, TAU); ctx.stroke(); ctx.restore(); }
     G.ships.forEach(drawShip);
     if (mode !== 'menu') drawBombs();
 
@@ -3133,7 +3206,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (mode === 'play') { update(dt); bgT += dt; updateHUD(); updateClock(); }
     else if (mode === 'menu') { bgT += dt; G.time += dt; G.px = W / 2 + Math.sin(bgT * 1.2) * 60; G.py = H - 110 + Math.sin(bgT * 2) * 6; }
     else if (mode === 'over') { updateFx(dt); bgT += dt; }
-    drawAll(mode === 'pause' || (mode === 'play' && roundOpen) ? 0 : dt);
+    drawAll(mode === 'pause' || (mode === 'play' && (roundOpen || tipOpen)) ? 0 : dt);
     requestAnimationFrame(frame);
   }
   /* the game freezes by itself and the three sentences slide up */
@@ -3180,7 +3253,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     hudKey = ''; wpKey = ''; pnameKey = -1; clockKey = -1;
     $('hudline').hidden = false; $('hudTime').textContent = '0:00.0';
     mode = 'play';
-    roundOpen = false; panelOpen = false; drag = null; confirmOpen = false; $('ovConfirm').hidden = true;
+    roundOpen = false; panelOpen = false; drag = null; confirmOpen = false; tipOpen = false; $('tip').hidden = true; $('ovConfirm').hidden = true;
     voice.manual = false;
     $('sheet').hidden = true; showSay(false);
     $('ovStart').hidden = true; $('ovOver').hidden = true; $('ovPause').hidden = true; $('ovPanel').hidden = true; $('ovVol').hidden = true;
@@ -3239,7 +3312,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     panelOpen = true; panelPrev = mode;
     if (mode === 'play') { mode = 'pause'; pauseCommon(); }
     $(panelEl).hidden = false;
-    if (panelEl === 'ovPanel') pickVoiceRefresh(); else syncVol();
+    if (panelEl === 'ovVol') { syncVol(); pickVoiceRefresh(); }
     $(panelEl).querySelector('.pcard').scrollTop = 0;
   }
   function closePanel() {
@@ -3365,14 +3438,14 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   var stage = $('stage');
   /* touch / pen: drag anywhere, the plane moves by the same amount (finger never hides it). mouse: the plane goes to the pointer. */
   function onDown(e) {
-    if (mode !== 'play' || roundOpen) return;
+    if (mode !== 'play' || roundOpen || tipOpen) return;
     if (e.target && e.target.closest && e.target.closest('.sheet,.ov')) return;
     if (e.pointerType === 'mouse') { var r = cv.getBoundingClientRect(); G.tx = (e.clientX - r.left) / r.width * W; G.ty = (e.clientY - r.top) / r.height * H; }
     else drag = { id: e.pointerId, x: e.clientX, y: e.clientY, tx: G.tx, ty: G.ty };
     try { stage.setPointerCapture(e.pointerId); } catch (err) {}
   }
   function onMove(e) {
-    if (mode !== 'play' || roundOpen) return;
+    if (mode !== 'play' || roundOpen || tipOpen) return;
     var r = cv.getBoundingClientRect();
     if (e.pointerType === 'mouse') { G.tx = (e.clientX - r.left) / r.width * W; G.ty = (e.clientY - r.top) / r.height * H; }
     else if (drag && drag.id === e.pointerId) {
@@ -3422,6 +3495,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     cancelSpeech(); speak('Hello! My name is Sunny.');
   });
   $('btnVoiceTest').addEventListener('click', function () { this.blur(); cancelSpeech(); speak('Look at the sky. I can fly high.'); });
+  $('btnTipOk').addEventListener('click', function () { this.blur(); closeTip(); });
+  $('btnTipReset').addEventListener('click', function () { tipSeen = {}; try { localStorage.removeItem('sunnySkyV3Tips'); } catch (e) {} this.textContent = '다시 보여줄게요 ✓'; });
   $('btnGear').addEventListener('click', function () { this.blur(); openPanel(); });
   $('btnPanelClose').addEventListener('click', function () { closePanel(); });
   $('btnPanelClose2').addEventListener('click', function () { closePanel(); });
