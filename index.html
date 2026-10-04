@@ -232,6 +232,15 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
 }
 
 /* ===== V3 phone layout ===== */
+.vrow { display: grid; gap: 8px; padding: 10px; border: 1.5px solid var(--line); border-radius: 12px; }
+.vrow h3 { margin: 0; }
+.vrow .vt { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.vrow .vt em { font-style: normal; font-family: var(--font-type); font-weight: 700; font-size: 0.95rem; }
+.vrow input[type=range] { width: 100%; height: 34px; accent-color: var(--sun); touch-action: pan-y; margin: 0; }
+.vrow .vb { display: grid; grid-template-columns: repeat(3, 1fr) ; gap: 6px; }
+.vrow .vb button { font: inherit; font-size: 0.92rem; padding: 0.55em 0.2em; border-radius: 10px; border: 1.5px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; touch-action: manipulation; }
+.vrow .vb button[aria-pressed="true"] { border-color: var(--sun); background: color-mix(in srgb, var(--sun) 24%, transparent); font-weight: 700; }
+.vrow .go { font-size: 0.95rem; padding: 0.5em 0.9em; }
 .ver { margin: 0; text-align: center; font-family: var(--font-type); font-size: 0.74rem; color: var(--soft); }
 .sheet .say { border-color: var(--line); background: color-mix(in srgb, var(--fg) 9%, transparent); opacity: 0.8; transition: background 0.15s, border-color 0.15s; }
 .sheet .say .say-t b, .sheet .say .say-t span { color: var(--soft); }
@@ -246,7 +255,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 .top { flex: none; padding: 6px 8px 5px; display: grid; gap: 4px; background: var(--panel); border-bottom: 2px solid var(--ui-edge); }
-.r1, .r2 { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.r1, .r2 { display: flex; align-items: center; gap: 5px; min-width: 0; }
 .r1 { min-height: 40px; }
 .hearts { flex: none; }
 .hh { width: 18px; height: 18px; }
@@ -261,7 +270,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
 @keyframes chipFlash { 0%, 60% { background: var(--sun); transform: scale(1.12); } 100% { transform: scale(1); } }
 .sp { flex: 1 1 0; min-width: 0; }
 .ibtn {
-  flex: none; width: 40px; height: 40px; border-radius: 12px; border: 2px solid var(--ui-edge); background: var(--panel); color: var(--fg);
+  flex: none; width: 38px; height: 40px; border-radius: 12px; border: 2px solid var(--ui-edge); background: var(--panel); color: var(--fg);
   font-size: 1.2rem; line-height: 1; display: grid; place-items: center; cursor: pointer; padding: 0; touch-action: manipulation;
 }
 .ibtn:active { background: color-mix(in srgb, var(--sun) 30%, var(--panel)); }
@@ -345,6 +354,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <div class="pchip" id="pchip" aria-live="polite"><span aria-hidden="true">✈</span><span id="pname">기본기</span></div>
       <span class="sp"></span>
       <button class="ibtn" id="btnPause" aria-label="일시정지" title="일시정지">⏸</button>
+      <button class="ibtn" id="btnVol" aria-label="음량" title="음량">🔊</button>
       <button class="ibtn" id="btnGear" aria-label="제어판" title="제어판">⚙</button>
     </div>
     <div class="r2">
@@ -375,7 +385,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.05 · built 2026-10-04 16:03 (EST)</p>
+        <p class="ver" id="ver">v3.07 · built 2026-10-04 16:45 (EST)</p>
       </div>
     </div>
 
@@ -430,13 +440,34 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     </section>
   </div>
 
+  <div class="ovp" id="ovVol" hidden>
+    <div class="pcard" role="dialog" aria-modal="true" aria-label="음량">
+      <button class="pclose" id="btnVolClose" aria-label="닫기">✕</button>
+      <h2>🔊 음량</h2>
+      <p style="font-size:0.82rem;color:var(--soft)">폰 옆의 음량 버튼은 두 소리에 똑같이 적용돼요. 여기서는 두 소리의 크기를 따로 맞춰요.</p>
+      <section class="vrow">
+        <div class="vt"><h3>효과음 (적 처치·폭발·레벨업)</h3><em id="sfxPct">67%</em></div>
+        <input type="range" id="sfxRange" min="0" max="100" step="1" value="67" aria-label="효과음 크기">
+        <div class="vb" id="sfxBtns"><button data-v="33">작게</button><button data-v="67">보통</button><button data-v="100">크게</button></div>
+        <button class="go alt" id="btnSfxTest" type="button">🔊 들어 보기</button>
+      </section>
+      <section class="vrow">
+        <div class="vt"><h3>문장 읽어 주는 소리</h3><em id="vcPct">100%</em></div>
+        <input type="range" id="vcRange" min="0" max="100" step="1" value="100" aria-label="문장 소리 크기">
+        <div class="vb" id="vcBtns"><button data-v="40">작게</button><button data-v="70">보통</button><button data-v="100">크게</button></div>
+        <button class="go alt" id="btnVcTest" type="button">🔊 문장 들어보기</button>
+      </section>
+      <button class="go pclose-wide" id="btnVolClose2">닫고 계속하기</button>
+    </div>
+  </div>
+
   <div class="ovp" id="ovPanel" hidden>
     <div class="pcard" role="dialog" aria-modal="true" aria-label="제어판">
       <button class="pclose" id="btnPanelClose" aria-label="닫기">✕</button>
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.05 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.07 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -468,6 +499,13 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
           <li style="--c:var(--wc7)"><b>비행기 진화</b> · 두 무기를 모두 10단계로 키우면 열려요. 팔콘 → 랩터 → 팬텀 → 노바 → 셀레스티얼. 최대 하트와 기본 총이 늘어나요.</li>
         </ul>
         <p style="margin-top:8px;font-size:0.82rem;color:var(--soft)">무기는 처음에 고른 <b>두 종류</b>만 키울 수 있어요. 위쪽 칸에 현재 무기와 레벨이 보여요.</p>
+      </section>
+      <section>
+        <h3>발음 목소리</h3>
+        <p style="margin-bottom:6px">남자 목소리가 나오면 아래에서 다른 목소리를 골라 "들어 보기"를 눌러 보세요. 고른 목소리는 기억해요.</p>
+        <select id="voiceSel" style="width:100%;font:inherit;font-size:0.9rem;padding:0.5em;border-radius:10px;border:1.5px solid var(--line);background:var(--panel);color:var(--fg)"></select>
+        <p id="voiceNote" style="font-size:0.8rem;color:var(--soft);margin:4px 0 6px"></p>
+        <button class="go alt" id="btnVoiceTest" type="button" style="font-size:0.95rem;padding:0.5em 0.9em">🔊 들어 보기</button>
       </section>
       <button class="go pclose-wide" id="btnPanelClose2">닫고 계속하기</button>
     </div>
@@ -1068,8 +1106,12 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
 
   /* ---------- audio ---------- */
   var soundOn = true, speakOn = true, ac = null;
+  /* two separate volumes: sfxPct 0-100 (67 = the original loudness), vcPct 0-100 (speech) */
+  var sfxPct = 67, vcPct = 100, VOL_KEY = 'sunnySkyV3Vol';
+  try { var vs0 = JSON.parse(localStorage.getItem(VOL_KEY) || 'null'); if (vs0) { sfxPct = clamp(+vs0.s, 0, 100); vcPct = clamp(+vs0.v, 0, 100); } } catch (e) {}
+  function saveVol() { try { localStorage.setItem(VOL_KEY, JSON.stringify({ s: sfxPct, v: vcPct })); } catch (e) {} }
   function tone(f, d, type, v, slide) {
-    if (!soundOn) return;
+    if (!soundOn || sfxPct <= 0) return;
     try {
       if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
       if (ac.state === 'suspended') ac.resume();
@@ -1077,7 +1119,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       o.type = type || 'sine';
       o.frequency.setValueAtTime(f, t);
       if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, f + slide), t + d);
-      g.gain.setValueAtTime(v || 0.05, t);
+      var vv = (v || 0.05) * (sfxPct / 67);
+      g.gain.setValueAtTime(Math.max(0.0002, vv), t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + d);
       o.connect(g); g.connect(ac.destination);
       o.start(t); o.stop(t + d);
@@ -1100,19 +1143,44 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     [/\bava\b/i, 88], [/\ballison\b/i, 84], [/\bsamantha\b/i, 80], [/\bsusan\b/i, 72], [/zira/i, 70], [/\bnicky\b/i, 62], [/joanna|salli|kendra|kimberly/i, 60]
   ];
   var NOT_VOICE = /albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|ralph|junior|daniel|alex\b|tom\b|david|mark\b|guy\b|eddy|reed|rocko|grandpa|\bmale\b/i;
+  /* Android Google voices are all named "English United States"; their codes tell them apart (iol/iom/tpd are male voices) */
+  var MALE_CODE = /x-(iol|iom|tpd|ioj|ial)\b/i, FEMALE_CODE = /x-(tpf|sfg|iob|iog|tpc)\b/i, VOICE_KEY = 'sunnySkyV3Voice';
+  function vkey(v) { return (v.name || '') + ' ' + (v.voiceURI || ''); }
+  function enVoices() { try { return speechSynthesis.getVoices().filter(function (v) { return /^en/i.test(v.lang); }); } catch (e) { return []; } }
   function pickVoice() {
     try {
-      var vs = speechSynthesis.getVoices(), best = null, bs = -1;
+      var vs = speechSynthesis.getVoices(), best = null, bs = -1, saved = '';
+      try { saved = localStorage.getItem(VOICE_KEY) || ''; } catch (e) {}
+      if (saved) { var sv = vs.filter(function (v) { return (v.voiceURI || v.name) === saved; })[0]; if (sv) { voiceEn = sv; return; } }
       vs.forEach(function (v) {
-        if (!/^en/i.test(v.lang) || NOT_VOICE.test(v.name)) return;
+        var k = vkey(v);
+        if (!/^en/i.test(v.lang) || NOT_VOICE.test(k) || MALE_CODE.test(k)) return;
         var sc = /^en[-_]US/i.test(v.lang) ? 10 : 0;
-        VOICE_RANK.forEach(function (r) { if (r[0].test(v.name)) sc = Math.max(sc, sc % 10 + r[1]); });
+        VOICE_RANK.forEach(function (r) { if (r[0].test(k)) sc = Math.max(sc, sc % 10 + r[1]); });
+        if (FEMALE_CODE.test(k)) sc = Math.max(sc, sc % 10 + 90);
         if (sc > bs) { bs = sc; best = v; }
       });
-      voiceEn = best || vs.filter(function (v) { return /^en[-_]US/i.test(v.lang); })[0] || vs.filter(function (v) { return /^en/i.test(v.lang); })[0] || null;
-      var bt = document.getElementById('btnRead');
-      if (bt) bt.title = voiceEn ? '목소리: ' + voiceEn.name : '';
+      voiceEn = best || vs.filter(function (v) { return /^en[-_]US/i.test(v.lang) && !MALE_CODE.test(vkey(v)); })[0] || vs.filter(function (v) { return /^en/i.test(v.lang); })[0] || null;
     } catch (e) {}
+    try { fillVoiceSel(); } catch (e) {}
+  }
+  /* control panel: let the grown-up pick the voice that sounds right on this phone */
+  function fillVoiceSel() {
+    var sel = document.getElementById('voiceSel');
+    if (!sel) return;
+    var list = enVoices(), cur = voiceEn ? (voiceEn.voiceURI || voiceEn.name) : '', saved = '';
+    try { saved = localStorage.getItem(VOICE_KEY) || ''; } catch (e) {}
+    sel.textContent = '';
+    var o0 = document.createElement('option'); o0.value = ''; o0.textContent = '자동 (여자 목소리 우선)'; sel.appendChild(o0);
+    list.forEach(function (v, i) {
+      var o = document.createElement('option'); o.value = v.voiceURI || v.name;
+      var code = (v.voiceURI || '').replace(/^.*?(x-[a-z]+).*$/i, '$1');
+      o.textContent = (i + 1) + '번 · ' + v.name + ' (' + v.lang + ')' + (/^x-/.test(code) ? ' · ' + code : '');
+      sel.appendChild(o);
+    });
+    sel.value = saved && list.some(function (v) { return (v.voiceURI || v.name) === saved; }) ? saved : '';
+    var note = document.getElementById('voiceNote');
+    if (note) note.textContent = list.length ? '지금 목소리: ' + (voiceEn ? voiceEn.name : '-') : '이 브라우저에서는 목소리를 고를 수 없어요.';
   }
   try { speechSynthesis.onvoiceschanged = pickVoice; pickVoice(); } catch (e) {}
   function primeSpeech() {
@@ -1129,7 +1197,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       tries++;
       var id = ++uttId;
       var u = new SpeechSynthesisUtterance(text);
-      u.lang = 'en-US'; u.rate = 0.9;
+      u.lang = 'en-US'; u.rate = 0.9; u.volume = vcPct / 100;
       if (!voiceEn) pickVoice();
       if (voiceEn) u.voice = voiceEn;
       u.pitch = 1.0;
@@ -3018,7 +3086,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     roundOpen = false; panelOpen = false; drag = null; confirmOpen = false; $('ovConfirm').hidden = true;
     voice.manual = false;
     $('sheet').hidden = true; showSay(false);
-    $('ovStart').hidden = true; $('ovOver').hidden = true; $('ovPause').hidden = true; $('ovPanel').hidden = true;
+    $('ovStart').hidden = true; $('ovOver').hidden = true; $('ovPause').hidden = true; $('ovPanel').hidden = true; $('ovVol').hidden = true;
     $('btnPause').textContent = '⏸';
     keys = {};
     layout();
@@ -3065,20 +3133,34 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     }
   }
   /* control panel: pauses the game while open */
-  function openPanel() {
+  function pickVoiceRefresh() { try { if (!voiceEn) pickVoice(); fillVoiceSel(); } catch (e) {} }
+  var panelEl = 'ovPanel';
+  function openPanel(which) {
     if (panelOpen) return;
     hideConfirm(false);
+    panelEl = which || 'ovPanel';
     panelOpen = true; panelPrev = mode;
     if (mode === 'play') { mode = 'pause'; pauseCommon(); }
-    $('ovPanel').hidden = false;
-    $('ovPanel').querySelector('.pcard').scrollTop = 0;
+    $(panelEl).hidden = false;
+    if (panelEl === 'ovPanel') pickVoiceRefresh(); else syncVol();
+    $(panelEl).querySelector('.pcard').scrollTop = 0;
   }
   function closePanel() {
     if (!panelOpen) return;
     panelOpen = false;
-    $('ovPanel').hidden = true;
+    $(panelEl).hidden = true;
+    cancelSpeech();
     if (panelPrev === 'play' && mode === 'pause') { mode = 'play'; resumeCommon(); }
   }
+  function syncVol() {
+    $('sfxRange').value = sfxPct; $('vcRange').value = vcPct;
+    $('sfxPct').textContent = sfxPct + '%'; $('vcPct').textContent = vcPct + '%';
+    [['sfxBtns', sfxPct], ['vcBtns', vcPct]].forEach(function (p) {
+      Array.prototype.forEach.call($(p[0]).children, function (b) { b.setAttribute('aria-pressed', String(+b.getAttribute('data-v') === p[1])); });
+    });
+  }
+  function sfxSample() { sfx('boom'); setTimeout(function () { sfx('done'); }, 220); }
+  function vcSample() { cancelSpeech(); speak('Look at the sky. I can fly high.'); }
   function gameOver() { finish(false); }
   function fmtTime(sec) { var m = Math.floor(sec / 60), r = Math.floor(sec % 60); return m + ':' + (r < 10 ? '0' : '') + r; }
   function finish(cleared) {
@@ -3231,10 +3313,28 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   $('btnRoundCancel').addEventListener('click', function () { this.blur(); askCancel(); });
   $('btnConfirmYes').addEventListener('click', function () { cancelRound(); });
   $('btnConfirmNo').addEventListener('click', function () { hideConfirm(true); });
+  $('voiceSel').addEventListener('change', function () {
+    try { if (this.value) localStorage.setItem(VOICE_KEY, this.value); else localStorage.removeItem(VOICE_KEY); } catch (e) {}
+    voiceEn = null; pickVoice(); fillVoiceSel();
+    cancelSpeech(); speak('Hello! My name is Sunny.');
+  });
+  $('btnVoiceTest').addEventListener('click', function () { this.blur(); cancelSpeech(); speak('Look at the sky. I can fly high.'); });
   $('btnGear').addEventListener('click', function () { this.blur(); openPanel(); });
   $('btnPanelClose').addEventListener('click', function () { closePanel(); });
   $('btnPanelClose2').addEventListener('click', function () { closePanel(); });
   $('ovPanel').addEventListener('click', function (e) { if (e.target === this) closePanel(); });
+  $('ovVol').addEventListener('click', function (e) { if (e.target === this) closePanel(); });
+  $('btnVol').addEventListener('click', function () { this.blur(); openPanel('ovVol'); });
+  $('btnVolClose').addEventListener('click', closePanel);
+  $('btnVolClose2').addEventListener('click', closePanel);
+  $('sfxRange').addEventListener('input', function () { sfxPct = +this.value; syncVol(); saveVol(); });
+  $('sfxRange').addEventListener('change', sfxSample);
+  $('vcRange').addEventListener('input', function () { vcPct = +this.value; syncVol(); saveVol(); });
+  $('vcRange').addEventListener('change', vcSample);
+  $('sfxBtns').addEventListener('click', function (e) { var v = e.target.getAttribute && e.target.getAttribute('data-v'); if (v === null || v === undefined) return; sfxPct = +v; syncVol(); saveVol(); sfxSample(); });
+  $('vcBtns').addEventListener('click', function (e) { var v = e.target.getAttribute && e.target.getAttribute('data-v'); if (v === null || v === undefined) return; vcPct = +v; syncVol(); saveVol(); vcSample(); });
+  $('btnSfxTest').addEventListener('click', function () { this.blur(); sfxSample(); });
+  $('btnVcTest').addEventListener('click', function () { this.blur(); vcSample(); });
 
   /* ---------- boot ---------- */
   layout(); G.py = H - 110; G.ty = H - 110;
@@ -3247,7 +3347,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       start: doStart, openRound: openRound, closeRound: closeRound, layout: layout, H: function () { return H; }, panel: openPanel,
       setLv: function (o) { for (var k in o) { G.lv[k] = o[k]; if (G.slots.indexOf(+k) < 0 && G.slots.length < 2) G.slots.push(+k); } wpKey = ''; updateWeaponPanel(); },
       ship: launchShip, spawn: spawnEnemy, wave: function () { startWave(); }, nextRound: nextRound,
-      voice: function () { return voiceEn && voiceEn.name; }, setBg: function (v) { BG.p = v; }, bgp: function () { return BG.p; }, select: selectOpt, mean: meanLv, T: diffT, hpF: hpF, setEvo: function (n) { G.evo = n; G.maxHp = maxHpFor(n); wpKey = ''; updateWeaponPanel(); updateHUD(); }, final: startFinal, finish: finish, save: saveRecord, setDl: setDiff
+      voice: function () { return voiceEn && (voiceEn.name + '|' + voiceEn.voiceURI); }, setBg: function (v) { BG.p = v; }, bgp: function () { return BG.p; }, select: selectOpt, mean: meanLv, T: diffT, hpF: hpF, setEvo: function (n) { G.evo = n; G.maxHp = maxHpFor(n); wpKey = ''; updateWeaponPanel(); updateHUD(); }, final: startFinal, finish: finish, save: saveRecord, setDl: setDiff
     };
   }
 })();
