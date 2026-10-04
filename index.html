@@ -406,7 +406,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.11 · built 2026-10-04 18:08 (EST)</p>
+        <p class="ver" id="ver">v3.12 · built 2026-10-04 18:22 (EST)</p>
       </div>
     </div>
 
@@ -495,7 +495,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.11 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.12 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -511,7 +511,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
           <li>문장 옆 <b>듣기</b>를 누르면 발음을 다시 들을 수 있어요.</li>
           <li>세 번 틀린 문장은 <b>실패</b>예요. 그 무기가 한 단계 내려가고 그 카드는 못 써요. 세 문장이 모두 실패하면 새 문장이 나와요.</li>
           <li>하늘에서 <b>반짝이는 ⭐ 별</b>이 가끔 내려와요. 잡으면 점수와 상관없이 바로 문장이 나와서 업그레이드할 수 있어요. (쌓인 점수는 그대로예요.)</li>
-          <li><b>고정포탑</b>은 땅에 붙어서 아래로 흘러가는 장애물이에요. 총알로 못 부수니까 <b>부딪히지 말고 피하세요</b>. 닿으면 하트가 한 칸 닳아요.</li>
+          <li><b>고정포탑</b>은 땅에 붙어서 아래로 흘러가는 장애물이에요. 총알로 못 부수니까 <b>부딪히지 말고 피하세요</b>. 닿으면 하트가 한 칸 닳아요. 가까이(거리 100) 가면 내 속도가 40%로 느려져요.</li>
           <li>하트가 <b>0</b>이 되면 깜빡이는 마지막 기회예요. 한 번 더 맞으면 끝! 수리나 중간 보스를 물리치면 하트가 다시 차요.</li>
           <li>위쪽 <b>⏸</b>는 잠깐 멈춤, <b>⚙</b>는 이 제어판이에요. 마이크는 처음 시작할 때 허용해 주세요.</li>
         </ul>
@@ -1276,7 +1276,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   /* 3 Shield orbs: Lv1-5 more orbs (max 5); Lv6-10 stay 5 orbs but orbit farther out and attack */
   function rings(L) {
     var c = Math.min(L, 5);
-    return [{ n: c, r: 30 + 10 * c, o: 10, s: 2.2, atk: false, dps: 0 }]; /* Lv1-5: one more orb and 10 farther per level (40..80) */
+    return [{ n: c, r: 30 + 10 * c, o: 9 + L, s: 2.2, atk: false, dps: 0 }]; /* Lv1-5: one more orb and 10 farther per level (40..80) */
   }
   /* Lv6-10: five orbs are born together at the Lv5 distance (40) and spiral outward, slowly, while rotating until they all reach
      distance D. At that moment five new orbs are born at 40 (so up to ten orbs circle). The five that reached D lose their
@@ -1923,10 +1923,10 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     } else {
       /* Lv6-10: the Lv5 guard ring (5 blocking orbs at 80) stays, plus 5 fixed attack orbs that sit at the target distance from the start */
       G.orbs = []; G.orbLv = L;
-      var q = L - 6, Q = ORBS[q], oR = 12 + q * 0.8, sp2 = 2.2;
+      var q = L - 6, Q = ORBS[q], oR = 9 + L, sp2 = 2.2;
       for (var gi = 0; gi < 5; gi++) {
         var ga = G.time * sp2 + gi * TAU / 5;
-        G.orbPos.push({ x: G.px + Math.cos(ga) * 80, y: G.py + Math.sin(ga) * 80, r: 10, atk: false, def: true, dps: 0, a: ga, ring: 0, rr: 80, al: 1 });
+        G.orbPos.push({ x: G.px + Math.cos(ga) * 80, y: G.py + Math.sin(ga) * 80, r: oR, atk: false, def: true, dps: 0, a: ga, ring: 0, rr: 80, al: 1 });
       }
       for (var ai = 0; ai < 5; ai++) {
         var aa = G.time * sp2 + ai * TAU / 5 + 0.3;
@@ -2175,7 +2175,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   }
   var EARLY_WAVES = 8; /* waves 1-8 = up to and including the 2nd boss wave */
   var TIPS = {
-    turret: ['고정포탑', '제거할 수 없어요! 비행기가 부딪히면 체력이 한 칸 줄어요. 가까이 가면 붉은 경고 빛이 나타나요.'],
+    turret: ['고정포탑', '제거할 수 없어요! 비행기가 부딪히면 체력이 한 칸 줄어요. 가까이 가면 붉은 빛이 나타나고, 그 안에서는 비행기가 40% 속도로 느려져요.'],
     star: ['특별한 별이 떴어요!', '먹어보세요! 별을 먹으면 바로 업그레이드 문장이 나와요.']
   };
   var tipSeen = {};
@@ -2348,7 +2348,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (keys.ArrowDown) G.ty += sp * dt;
     G.tx = clamp(G.tx, 24, W - 24);
     G.ty = clamp(G.ty, 60, H - 30);
-    var f = Math.min(1, dt * 14);
+    /* near a fixed turret (about 100): no damage, but the plane moves at 40% speed */
+    var slow = false;
+    for (var si = 0; si < G.turrets.length; si++) { var st = G.turrets[si]; if (Math.hypot(st.x - G.px, st.y - G.py) < 100) { slow = true; break; } }
+    G.slowed = slow;
+    var f = Math.min(1, dt * 14) * (slow ? 0.4 : 1);
     G.px += (G.tx - G.px) * f; G.py += (G.ty - G.py) * f;
 
     G.clock += dt;
