@@ -406,7 +406,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.10 · built 2026-10-04 17:54 (EST)</p>
+        <p class="ver" id="ver">v3.11 · built 2026-10-04 18:08 (EST)</p>
       </div>
     </div>
 
@@ -495,7 +495,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.10 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.11 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -521,7 +521,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         <ul class="wl">
           <li style="--c:var(--wc1)"><b>총알 → 레이저 → 천광 레이저</b> · 1~5단계는 총알이 1~5발, 6~9단계는 레이저 빔, 10단계는 천광 레이저예요.</li>
           <li style="--c:var(--wc2)"><b>미사일 → 유도미사일 → 천무 미사일</b> · 느리지만 세요. 6단계부터 적을 따라가고, 7단계부터 폭발이 커지고, 10단계는 천무 미사일이에요.</li>
-          <li style="--c:var(--wc3)"><b>방어막 → APS → 아이언 돔</b> · 구체가 몸 주위를 돌며 총알을 막아요. 6단계부터 구체가 바깥으로 퍼져 나가고, 목표 거리에 닿으면 사라지지 않고 계속 돌면서 적을 공격해요.</li>
+          <li style="--c:var(--wc3)"><b>방어막 → APS → 아이언 돔</b> · 구체가 몸 주위를 돌며 총알을 막아요(레벨마다 1개씩, 거리 40~80). 6단계부터는 방어 구체 5개가 거리 80에 남고, 멀리(176~290)에서 도는 공격 구체 5개가 더해져요.</li>
           <li style="--c:var(--wc4)"><b>드론 → 자율드론 → 골든 윙</b> · 따라다니며 부채꼴로 쏴요. 6단계부터 알아서 날아다니고, 10단계는 골든 윙이에요.</li>
           <li style="--c:var(--wc8)"><b>폭발탄 → 소이탄 → 네이팜탄</b> · 1~5단계는 한 번 폭발, 6~9단계 소이탄은 땅을 태우고, 10단계 네이팜탄은 크게 타올라요.</li>
           <li style="--c:var(--wc5)"><b>광역 공격(모선)</b> · 두 무기 레벨의 평균으로 <b>자동</b>으로 커져요. 적 총알을 지우고 나중엔 포탑과 메가 빔으로 공격해요.</li>
@@ -1275,7 +1275,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
              dmg: [6, 7, 8, 9, 10, 12, 14, 17, 20, 24], spl: [0, 0, 0, 0, 0, 0, 26, 34, 44, 56] };
   /* 3 Shield orbs: Lv1-5 more orbs (max 5); Lv6-10 stay 5 orbs but orbit farther out and attack */
   function rings(L) {
-    return [{ n: L, r: 40, o: 10, s: 2.2, atk: false, dps: 0 }];
+    var c = Math.min(L, 5);
+    return [{ n: c, r: 30 + 10 * c, o: 10, s: 2.2, atk: false, dps: 0 }]; /* Lv1-5: one more orb and 10 farther per level (40..80) */
   }
   /* Lv6-10: five orbs are born together at the Lv5 distance (40) and spiral outward, slowly, while rotating until they all reach
      distance D. At that moment five new orbs are born at 40 (so up to ten orbs circle). The five that reached D lose their
@@ -1315,10 +1316,10 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       return '유도미사일 ' + W2.n[L - 1] + '발 · 폭발 범위 + 위력 ' + W2.dmg[L - 1];
     }
     if (t === 3) {
-      if (L <= 5) return '구체 ' + L + '개가 몸 주위를 돌며 총알을 막아요';
-      if (L === 6) return 'APS로 진화! 구체 5개가 퍼져 나가며 막고, 목표 거리에 닿으면 계속 돌면서 공격해요';
-      if (L === 10) return '아이언 돔! 거리 290에서 번개 구체들이 계속 돌며 공격해요';
-      return '구체 5개가 거리 ' + ORBS[L - 6].D + '까지 퍼지며 막아요 · 도착하면 사라지지 않고 계속 돌며 공격해요 · 공격력 ' + ORB_DPS[L - 6];
+      if (L <= 5) return '구체 ' + L + '개가 몸에서 ' + (30 + 10 * L) + ' 거리를 돌며 총알을 막아요';
+      if (L === 6) return 'APS로 진화! 방어 구체 5개(거리 80)에 더해 공격 구체 5개가 거리 176에서 돌아요';
+      if (L === 10) return '아이언 돔! 번개 공격 구체 5개가 거리 290에서 돌아요';
+      return '방어 구체 5개(거리 80) + 공격 구체 5개(거리 ' + ORBS[L - 6].D + ') · 공격력 ' + ORB_DPS[L - 6];
     }
     if (t === 4) {
       if (L <= 5) return '드론 ' + W4.n[L - 1] + '기가 따라다니며 부채꼴로 사격해요';
@@ -1920,22 +1921,17 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         }
       });
     } else {
-      var q = L - 6, Q = ORBS[q], oR = 12 + q * 0.8, cap = L === 10 ? 20 : 15; /* arrived orbs stay and keep circling (oldest ones make room beyond the cap) */
-      if (G.orbLv !== L) { G.orbLv = L; G.orbs = []; G.orbNext = 0; }
-      G.orbNext -= dt;
-      while (G.orbNext <= 0) {
-        var ag = -G.orbNext, base = (G.orbK++) * 0.7;
-        for (var i5 = 0; i5 < 5; i5++) G.orbs.push({ age: ag, a0: base + i5 * TAU / 5, c: i5 });
-        G.orbNext += Q.tout;
+      /* Lv6-10: the Lv5 guard ring (5 blocking orbs at 80) stays, plus 5 fixed attack orbs that sit at the target distance from the start */
+      G.orbs = []; G.orbLv = L;
+      var q = L - 6, Q = ORBS[q], oR = 12 + q * 0.8, sp2 = 2.2;
+      for (var gi = 0; gi < 5; gi++) {
+        var ga = G.time * sp2 + gi * TAU / 5;
+        G.orbPos.push({ x: G.px + Math.cos(ga) * 80, y: G.py + Math.sin(ga) * 80, r: 10, atk: false, def: true, dps: 0, a: ga, ring: 0, rr: 80, al: 1 });
       }
-      G.orbs.forEach(function (o) { o.age += dt; });
-      var arrivedN = 0; G.orbs.forEach(function (o) { if (o.age >= Q.tout) arrivedN++; });
-      for (var oi2 = 0; arrivedN > cap && oi2 < G.orbs.length;) { if (G.orbs[oi2].age >= Q.tout) { G.orbs.splice(oi2, 1); arrivedN--; } else oi2++; }
-      G.orbs.forEach(function (o) {
-        var out = o.age < Q.tout, r = out ? 40 + (Q.D - 40) * (o.age / Q.tout) : Q.D, a = o.a0 + Q.w * o.age;
-        var al = Math.min(1, o.age / 0.15);
-        G.orbPos.push({ x: G.px + Math.cos(a) * r, y: G.py + Math.sin(a) * r, r: oR, atk: !out, def: out, dps: ORB_DPS[q], a: a, ring: o.c, rr: r, al: Math.max(0.05, al) * (out ? 1 : 0.95), arrived: !out });
-      });
+      for (var ai = 0; ai < 5; ai++) {
+        var aa = G.time * sp2 + ai * TAU / 5 + 0.3;
+        G.orbPos.push({ x: G.px + Math.cos(aa) * Q.D, y: G.py + Math.sin(aa) * Q.D, r: oR, atk: true, def: false, dps: ORB_DPS[q], a: aa, ring: ai, rr: Q.D, al: 0.95, arrived: true });
+      }
     }
     G.orbTick -= dt;
     if (G.orbTick <= 0) {
@@ -2796,6 +2792,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         ctx.globalAlpha = 0.18; ctx.strokeStyle = SHG; ctx.lineWidth = 1.5; ctx.setLineDash([4, 6]); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
       });
     } else {
+      ctx.beginPath(); ctx.arc(G.px, G.py, 80, 0, TAU);
+      ctx.globalAlpha = 0.18; ctx.strokeStyle = SHG; ctx.lineWidth = 1.5; ctx.setLineDash([4, 6]); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
       ctx.beginPath(); ctx.arc(G.px, G.py, ORBS[L - 6].D, 0, TAU);
       ctx.globalAlpha = 0.14; ctx.strokeStyle = elec ? SP : SHG; ctx.lineWidth = 1.5; ctx.setLineDash([4, 8]); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
     }
