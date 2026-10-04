@@ -285,7 +285,9 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   background: var(--panel); border-top: 3px solid var(--ui-edge); border-radius: 18px 18px 0 0; padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
   display: grid; gap: 8px; box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.3); z-index: 4;
 }
-.sheet .grab { justify-self: center; width: 44px; height: 4px; border-radius: 2px; background: var(--line); }
+.sheet .shead { display: flex; justify-content: flex-end; align-items: center; margin: -2px 0 -4px; }
+.sheet .shead .tbtn { padding: 0.35em 0.9em; font-size: 0.82rem; touch-action: manipulation; }
+.sheet .grab { display: none; justify-self: center; width: 44px; height: 4px; border-radius: 2px; background: var(--line); }
 .sheet .prompt { font-size: 0.84rem; text-align: center; }
 .sheet .opts { gap: 8px; }
 .sheet .opt { padding: 10px 10px; gap: 9px; touch-action: manipulation; }
@@ -395,8 +397,16 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       </div>
     </div>
 
+    <div class="ov" id="ovConfirm" hidden style="z-index:15">
+      <div class="card" role="alertdialog" aria-modal="true" aria-label="업그레이드 취소 확인">
+        <h2 style="font-size:1.35rem">업그레이드를 취소하고 비행 화면으로 돌아가겠습니까?</h2>
+        <p class="seg-note" style="min-height:0">취소하면 이번 업그레이드는 건너뛰고 게임을 계속해요.</p>
+        <div class="endbtns"><button class="go alt" id="btnConfirmNo" type="button">취소</button><button class="go" id="btnConfirmYes" type="button">확인</button></div>
+      </div>
+    </div>
+
     <section class="sheet" id="sheet" hidden aria-label="문장 고르기">
-      <div class="grab" aria-hidden="true"></div>
+      <div class="shead"><button class="tbtn" id="btnRoundCancel" type="button">✕ 업그레이드 취소</button></div>
       <p class="prompt" id="prompt"></p>
       <div class="opts" id="opts"></div>
       <div class="say" id="say" hidden>
@@ -1247,7 +1257,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     2: { hp: 1.9, def: 0.10, cnt: 1.3, maxN: 32, sp: 1.25, fi: 0.82, fdef: 0.55, name: '매우 어려움' }
   };
   var FINAL_HP = 22000;
-  var GOAL_FIRST = 400, GOAL_STEP = 900, roundOpen = false, panelOpen = false, panelPrev = '', drag = null, launching = false;
+  var GOAL_FIRST = 400, GOAL_STEP = 900, SECS_PER_ROUND = 30, GOAL_MAX = 30000, confirmOpen = false, roundOpen = false, panelOpen = false, panelPrev = '', drag = null, launching = false;
   /* ---------- background zones: 0 ground, 1 sea, 2 sky, 3 space ---------- */
   var BG = { p: 0, scr: 0, kind: 0 };
   var ZONES = ['지상', '바다', '하늘', '우주'];
@@ -1269,7 +1279,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       inv: 0, px: W / 2, py: H - 110, tx: W / 2, ty: H - 110,
       bullets: [], pb: [], enemies: [], parts: [], pops: [], ships: [], orbPos: [], orbs: [], orbLv: 0, orbNext: 0, orbK: 0, freezeUsed: false, drones: [],
       spawnQ: [], waveT: 0, waveClear: true, nextWave: 2.2, roundT: 0,
-      baseT: 0, t2: 0, laserTick: 0, orbTick: 0, time: 0, shake: 0, flash: 0, bosses: 0, read: [], evo: 0, killScore: 0, goalPrev: 0, goal: GOAL_FIRST, closeT: 0, roundAt: 0, finalMode: false, ending: false, endT: 0, clock: 0, cleared: false
+      baseT: 0, t2: 0, laserTick: 0, orbTick: 0, time: 0, shake: 0, flash: 0, bosses: 0, read: [], evo: 0, killScore: 0, goalPrev: 0, goal: GOAL_FIRST, closeT: 0, roundAt: 0, rate: 0, ksPrev: 0, finalMode: false, ending: false, endT: 0, clock: 0, cleared: false
     };
     R = { opts: [], sel: -1, stage: 'none', sayLeft: 0, sayWait: 0 };
   }
@@ -2199,7 +2209,10 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       R.sayLeft -= dt;
       if (R.sayLeft <= 0) { $('btnSaid').disabled = false; tone(880, 0.1, 'triangle', 0.04); }
     }
-    if (roundOpen) return;
+    if (roundOpen) { G.ksPrev = G.killScore; return; }
+    /* how fast the player is scoring right now (points per second, smoothed) -> the next sentence comes after ~SECS_PER_ROUND seconds of play */
+    if (dt > 0) G.rate += ((G.killScore - G.ksPrev) / dt - G.rate) * Math.min(1, dt / 20);
+    G.ksPrev = G.killScore;
     if (!G.ending && (G.killScore >= G.goal || (G.finalMode && G.time - G.roundAt > 24))) { openRound(); return; }
 
     G.time += dt;
@@ -2960,12 +2973,30 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     $('sheet').hidden = false; $('sheet').scrollTop = 0;
     tone(520, 0.12, 'triangle', 0.05);
   }
+  function nextStep() { return Math.round(clamp(G.rate * SECS_PER_ROUND, GOAL_STEP, GOAL_MAX) / 50) * 50; }
+  function askCancel() {
+    if (!roundOpen || confirmOpen || mode !== 'play' || G.closeT > 0 || R.stage === 'done') return;
+    confirmOpen = true; stopListening(); cancelSpeech();
+    $('ovConfirm').hidden = false;
+  }
+  function hideConfirm(resume) {
+    if (!confirmOpen) return;
+    confirmOpen = false; $('ovConfirm').hidden = true;
+    if (resume) resumeCommon();
+  }
+  function cancelRound() {
+    hideConfirm(false);
+    stopListening(); cancelSpeech(); clearPart();
+    closeRound();
+    G.goalPrev = G.killScore; G.goal = G.killScore + nextStep(); G.roundAt = G.time;
+    updateHUD();
+  }
   function closeRound() {
     roundOpen = false;
     $('sheet').hidden = true;
     showSay(false);
     R.stage = 'none'; R.sel = -1; R.opts = [];
-    G.goalPrev = G.goal; G.goal = G.goal + GOAL_STEP; /* surplus points carry over: several upgrades in a row if needed */
+    G.goalPrev = G.goal; G.goal = G.goal + nextStep(); /* surplus points carry over: several upgrades in a row if needed */
     G.inv = Math.max(G.inv, 1.2);
     updateHUD();
   }
@@ -2974,7 +3005,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     reset(); BG.p = 0; BG.kind = 0;
     hudKey = ''; wpKey = ''; pnameKey = -1;
     mode = 'play';
-    roundOpen = false; panelOpen = false; drag = null;
+    roundOpen = false; panelOpen = false; drag = null; confirmOpen = false; $('ovConfirm').hidden = true;
     voice.manual = false;
     $('sheet').hidden = true; showSay(false);
     $('ovStart').hidden = true; $('ovOver').hidden = true; $('ovPause').hidden = true; $('ovPanel').hidden = true;
@@ -3014,7 +3045,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     speak(o.en, listenSoon);
   }
   function togglePause() {
-    if (panelOpen) return;
+    if (panelOpen || confirmOpen) return;
     if (mode === 'play') {
       mode = 'pause'; pauseCommon();
       $('ovPause').hidden = false; $('btnPause').textContent = '▶'; $('btnPause').setAttribute('aria-label', '계속하기');
@@ -3026,6 +3057,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   /* control panel: pauses the game while open */
   function openPanel() {
     if (panelOpen) return;
+    hideConfirm(false);
     panelOpen = true; panelPrev = mode;
     if (mode === 'play') { mode = 'pause'; pauseCommon(); }
     $('ovPanel').hidden = false;
@@ -3186,6 +3218,9 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     this.blur();
     openMic(function (ok) { if (ok) { if (IS_MOBILE) closeMic(); leaveManual(); } });
   });
+  $('btnRoundCancel').addEventListener('click', function () { this.blur(); askCancel(); });
+  $('btnConfirmYes').addEventListener('click', function () { cancelRound(); });
+  $('btnConfirmNo').addEventListener('click', function () { hideConfirm(true); });
   $('btnGear').addEventListener('click', function () { this.blur(); openPanel(); });
   $('btnPanelClose').addEventListener('click', function () { closePanel(); });
   $('btnPanelClose2').addEventListener('click', function () { closePanel(); });
