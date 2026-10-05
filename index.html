@@ -407,7 +407,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.18 · built 2026-10-04 21:00 (EST)</p>
+        <p class="ver" id="ver">v3.19 · built 2026-10-04 21:15 (EST)</p>
       </div>
     </div>
 
@@ -496,7 +496,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.18 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.19 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -2365,37 +2365,38 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       if (e.fireT <= 0) { e.fireT = (3.0 + Math.random() * 0.6) * slow; a = aim(e); for (k = -1; k <= 1; k++) eb(e.x, e.y + 14, a + k * 0.16, 150 * sp, 7); }
     } else if (e.type === 'boss') {
       var phase = Math.floor(e.age / 4) % (e.final ? 6 : T >= 6 ? 4 : 3);
+      /* unique attacks: first one 2 s after the boss has arrived, then exactly every 6 s (2 s, 8 s, 14 s ...) */
+      var spFire = false;
+      if (!e.final) { if (e.spT == null) e.spT = e.summoned ? 0.3 : 2; e.spT -= dt; if (e.spT <= 0) { e.spT += 6; spFire = true; } }
       if (!e.final && e.skin === 0) {
-        /* mecha beetle: every 7 s it rolls up a big clod of earth and hurls it at the plane */
-        e.spT = (e.spT == null ? 4 : e.spT) - dt;
+        /* mecha beetle: it rolls up a big clod of earth and hurls it at the plane */
         if (e.clodW > 0) {
           e.clodW -= dt;
           if (e.clodW <= 0) {
             var ca = Math.atan2(G.py - (e.y + 70), G.px - e.x);
-            G.bullets.push({ x: e.x, y: e.y + 70, vx: Math.cos(ca) * 380, vy: Math.sin(ca) * 380, r: 50, clod: true, rot: 0 });
+            G.bullets.push({ x: e.x, y: e.y + 70, vx: Math.cos(ca) * 760, vy: Math.sin(ca) * 760, r: 50, clod: true, rot: 0 });
             G.shake = Math.max(G.shake, 0.15); sfx('boom');
           }
-        } else if (e.spT <= 0) { e.spT = 7; e.clodW = 0.8; }
+        } else if (spFire) e.clodW = 0.8;
       }
       if (!e.final && e.skin === 2) {
-        /* thunder eagle: every 7 s it flaps and rains about 10 feathers, each aimed at where the plane is at that moment */
-        e.spT = (e.spT == null ? 4 : e.spT) - dt;
+        /* thunder eagle: flaps and rains about 10 feathers in quick succession, each aimed at where the plane is at that moment */
+        if (spFire) { e.flapW = 0.45; }
         if (e.flapW > 0) { e.flapW -= dt; if (e.flapW <= 0) { e.featN = 10; e.featT = 0; } }
         else if (e.featN > 0) {
           e.featT -= dt;
           if (e.featT <= 0) {
-            e.featT = 0.07; e.featN--;
+            e.featT = 0.035; e.featN--;
             var fx = e.x + (e.featN % 2 ? 1 : -1) * (35 + Math.random() * 50), fy = e.y - 5 + Math.random() * 15;
             var fa = Math.atan2(G.py - fy, G.px - fx) + (Math.random() - 0.5) * 0.06;
-            G.bullets.push({ x: fx, y: fy, vx: Math.cos(fa) * 340, vy: Math.sin(fa) * 340, r: 5, feather: true });
+            G.bullets.push({ x: fx, y: fy, vx: Math.cos(fa) * 680, vy: Math.sin(fa) * 680, r: 5, feather: true });
             sfx('shot');
           }
-        } else if (e.spT <= 0) { e.spT = 7; e.flapW = 0.6; }
+        }
       }
       if (!e.final && e.skin === 3) {
-        /* alien commander: every 7 s twelve beams burst out in all directions (blinks twice to show the paths first) */
-        e.spT = (e.spT == null ? 4 : e.spT) - dt;
-        if (!e.bm && e.spT <= 0) { e.spT = 7; e.bm = { tm: 0, base: Math.random() * TAU / 12 }; }
+        /* alien commander: twelve beams burst out in all directions (blinks twice to show the paths first) */
+        if (!e.bm && spFire) e.bm = { tm: 0, base: Math.random() * TAU / 12 };
         if (e.bm) {
           e.bm.tm += dt;
           if (e.bm.tm > 1.4) e.bm = null;
@@ -2406,7 +2407,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
               var brx = G.px - bx0, bry = G.py - by0, bd = brx * bex + bry * bey;
               if (bd < 0) continue;
               var bdx = brx - bex * bd, bdy = bry - bey * bd;
-              if (G.inv <= 0 && Math.hypot(bdx, bdy) < 3 + bd * 0.035 + 4) hit();
+              if (G.inv <= 0 && Math.hypot(bdx, bdy) < 3 + bd * 0.07 + 4) hit();
             }
           }
         }
@@ -2430,26 +2431,20 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         }
       }
       if (!e.final && e.skin === 1) {
-        /* deep-sea octopus king: every 7 s two tentacles shoot straight at where the plane is */
-        e.spT = (e.spT == null ? 4 : e.spT) - dt;
+        /* deep-sea octopus king: its two outer legs shoot out side by side toward the plane, keeping their spacing; the whole band is the danger zone */
         if (!e.tents) e.tents = [];
-        if (e.spT <= 0 && !e.tents.length) {
-          e.spT = 7;
-          /* the two tentacles aim at the spot where the plane is right now (side by side, ~22 px apart) and stay rooted in the boss */
-          [-11, 11].forEach(function (d) { e.tents.push({ tx: G.px + d, ty: G.py, ang: 0, ph: 0, tm: 0, len: 0, max: 0 }); });
-        }
+        if (spFire) e.tents.push({ tx: G.px, ty: G.py, ph: 1, tm: 0, len: 0, max: 0, ang: 0 });
         e.tents.forEach(function (tn) {
-          tn.ang = Math.atan2(tn.ty - (e.y + 10), tn.tx - e.x); tn.max = Math.hypot(tn.ty - (e.y + 10), tn.tx - e.x) + 260;
+          var mx = e.x, my = e.y - 10;
+          tn.ang = Math.atan2(tn.ty - my, tn.tx - mx); tn.max = Math.hypot(tn.ty - my, tn.tx - mx) + 260;
           tn.tm += dt;
-          if (tn.ph === 0 && tn.tm >= 0.7) { tn.ph = 1; tn.tm = 0; }
-          else if (tn.ph === 1) { tn.len = Math.min(tn.max, tn.len + 450 * dt); if (tn.len >= tn.max) { tn.ph = 2; tn.tm = 0; } }
+          if (tn.ph === 1) { tn.len = Math.min(tn.max, tn.len + 900 * dt); if (tn.len >= tn.max) { tn.ph = 2; tn.tm = 0; } }
           else if (tn.ph === 2 && tn.tm >= 0.3) { tn.ph = 3; tn.tm = 0; }
-          else if (tn.ph === 3) { tn.len -= 900 * dt; if (tn.len <= 0) tn.dead = true; }
+          else if (tn.ph === 3) { tn.len -= 1800 * dt; if (tn.len <= 0) tn.dead = true; }
           if (tn.len > 0) {
-            var ox2 = e.x, oy2 = e.y + 10, ex2 = Math.cos(tn.ang), ey2 = Math.sin(tn.ang);
-            var rx2 = G.px - ox2, ry2 = G.py - oy2, pr2 = clamp(rx2 * ex2 + ry2 * ey2, 0, tn.len);
-            var dx2 = rx2 - ex2 * pr2, dy2 = ry2 - ey2 * pr2;
-            if (dx2 * dx2 + dy2 * dy2 < 17 * 17 && G.inv <= 0) hit();
+            var dx3 = Math.cos(tn.ang), dy3 = Math.sin(tn.ang), rx3 = G.px - mx, ry3 = G.py - my;
+            var s3 = rx3 * dx3 + ry3 * dy3, l3 = rx3 * -dy3 + ry3 * dx3;
+            if (s3 >= 0 && s3 <= tn.len && Math.abs(l3) < 48 + 13 + 4 && G.inv <= 0) hit();
           }
         });
         e.tents = e.tents.filter(function (tn) { return !tn.dead; });
@@ -2817,23 +2812,23 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   }
   function drawTents(e) {
     ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    var ox = e.x, oy = e.y + 10, tt = G.time;
+    var mx = e.x, my = e.y - 10, tt = G.time;
     e.tents.forEach(function (tn) {
-      var ex = Math.cos(tn.ang), ey = Math.sin(tn.ang), nx = -ey, ny = ex;
-      if (tn.ph === 0) {
-        ctx.globalAlpha = 0.25 + 0.2 * Math.sin(tt * 30); ctx.strokeStyle = '#ff5c8a'; ctx.lineWidth = 30;
-        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + ex * tn.max, oy + ey * tn.max); ctx.stroke();
-        ctx.globalAlpha = 0.7; ctx.lineWidth = 2.5; ctx.setLineDash([10, 8]); ctx.strokeStyle = '#fff';
-        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + ex * tn.max, oy + ey * tn.max); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
-        return;
-      }
       if (tn.len <= 0) return;
-      var n = Math.max(2, Math.ceil(tn.len / 16));
-      function path() { ctx.beginPath(); for (var i = 0; i <= n; i++) { var d = tn.len * i / n, w = Math.sin(d * 0.045 - tt * 12) * 7 * (i / n); if (i) ctx.lineTo(ox + ex * d + nx * w, oy + ey * d + ny * w); else ctx.moveTo(ox, oy); } }
-      path(); ctx.strokeStyle = C.outline; ctx.lineWidth = 31; ctx.stroke();
-      path(); ctx.strokeStyle = '#8e6bd0'; ctx.lineWidth = 25; ctx.stroke();
-      path(); ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 7; ctx.stroke();
-      for (var i = 1; i < n; i += 2) { var d = tn.len * i / n, w = Math.sin(d * 0.045 - tt * 12) * 7 * (i / n); ctx.beginPath(); ctx.arc(ox + ex * d + nx * (w + 6), oy + ey * d + ny * (w + 6), 3.2, 0, TAU); ctx.fillStyle = '#ffd1e8'; ctx.fill(); }
+      var dx = Math.cos(tn.ang), dy = Math.sin(tn.ang), nx = -dy, ny = dx, L = tn.len, HW = 61;
+      /* danger zone: the whole band between and around the two legs */
+      ctx.beginPath(); ctx.moveTo(mx + nx * HW, my + ny * HW); ctx.lineTo(mx + dx * L + nx * HW, my + dy * L + ny * HW); ctx.lineTo(mx + dx * L - nx * HW, my + dy * L - ny * HW); ctx.lineTo(mx - nx * HW, my - ny * HW); ctx.closePath();
+      ctx.globalAlpha = 0.22 + 0.08 * Math.sin(tt * 30); ctx.fillStyle = '#ff3d77'; ctx.fill();
+      ctx.globalAlpha = 0.85; ctx.setLineDash([12, 8]); ctx.lineDashOffset = -tt * 120; ctx.strokeStyle = '#ff7aa8'; ctx.lineWidth = 3; ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      /* the two legs */
+      [-1, 1].forEach(function (sd) {
+        var ox = mx + nx * 48 * sd, oy = my + ny * 48 * sd, n = Math.max(2, Math.ceil(L / 18));
+        function path() { ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + dx * L, oy + dy * L); }
+        path(); ctx.strokeStyle = C.outline; ctx.lineWidth = 31; ctx.stroke();
+        path(); ctx.strokeStyle = '#8e6bd0'; ctx.lineWidth = 25; ctx.stroke();
+        path(); ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 7; ctx.stroke();
+        for (var i = 1; i < n; i += 2) { var d = L * i / n; ctx.beginPath(); ctx.arc(ox + dx * d + nx * 6 * sd, oy + dy * d + ny * 6 * sd, 3.2, 0, TAU); ctx.fillStyle = '#ffd1e8'; ctx.fill(); }
+      });
     });
     ctx.restore();
   }
@@ -2843,7 +2838,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     var on = bm.tm < 0.4 ? (bm.tm < 0.1 || (bm.tm >= 0.2 && bm.tm < 0.3)) : true;
     if (on) for (var i = 0; i < 12; i++) {
       var a = bm.base + i * TAU / 12, ex = Math.cos(a), ey = Math.sin(a), nx = -ey, ny = ex;
-      var h0 = 3, h1 = 3 + len * 0.035;
+      var h0 = 3, h1 = 3 + len * 0.07;
       ctx.beginPath(); ctx.moveTo(ox + nx * h0, oy + ny * h0); ctx.lineTo(ox + ex * len + nx * h1, oy + ey * len + ny * h1); ctx.lineTo(ox + ex * len - nx * h1, oy + ey * len - ny * h1); ctx.lineTo(ox - nx * h0, oy - ny * h0); ctx.closePath();
       if (bm.tm < 0.4) {
         ctx.globalAlpha = 0.18; ctx.fillStyle = '#7ef3ff'; ctx.fill(); ctx.globalAlpha = 0.9; ctx.setLineDash([10, 8]); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.6; ctx.stroke(); ctx.setLineDash([]);
