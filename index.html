@@ -407,7 +407,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.17 · built 2026-10-04 20:54 (EST)</p>
+        <p class="ver" id="ver">v3.18 · built 2026-10-04 21:00 (EST)</p>
       </div>
     </div>
 
@@ -496,7 +496,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.17 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.18 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -2203,7 +2203,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     G.finalPending = false; G.roundAt = G.time;
     var D = DIFFS[dl], hp = Math.round(FINAL_HP * D.hp);
     G.enemies.push({ type: 'boss', skin: 3, final: true, def: D.fdef, x: W / 2, y: -90, ox: W / 2, amp: 120, hp: hp, maxHp: hp, r: 74,
-      ty: 135, age: 0, fireT: 1.5, ph: 0, ang: 0, flash: 0, dead: false, arrived: false, escT: 9 });
+      ty: 250, age: 0, fireT: 1.5, ph: 0, ang: 0, flash: 0, dead: false, arrived: false, escT: 9, sumT: 3 });
     announce('FINAL BOSS', '마지막 보스가 나타났어요!');
     G.flash = 0.4; G.shake = 0.5; sfx('mother'); updateHUD();
   }
@@ -2311,11 +2311,15 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       G.score += 10000; G.final = 2; G.ending = true; G.endT = 3.4;
       G.bullets.length = 0; G.spawnQ = []; G.flash = 0.6; G.shake = 0.8;
       for (var fz = 0; fz < 6; fz++) burst(e.x + rnd(-60, 60), e.y + rnd(-40, 40), 50, fz % 2 ? C.sun : '#fff', 380);
+      G.enemies.forEach(function (m) { if (!m.dead && m !== e) { m.dead = true; burst(m.x, m.y, 30, C.sun, 300); } });
       announce('YOU WIN!', '최종 보스를 물리쳤어요! 축하해요, Sunny!');
       stopListening(); cancelSpeech(); showSay(false); R.stage = 'done'; G.roundT = 0;
       return;
     }
-    if (e.type === 'boss') {
+    if (e.type === 'boss' && e.summoned) {
+      G.flash = 0.2; G.shake = 0.3; G.bullets.length = 0;
+      announce('SUMMON DOWN', '소환된 보스를 물리쳤어요!');
+    } else if (e.type === 'boss') {
       G.bosses++; G.flash = 0.35; G.shake = 0.5; G.bullets.length = 0;
       if (G.hp < G.maxHp) G.hp++;
       announce('BOSS DOWN', '보스를 물리쳤어요! 하트 +1');
@@ -2337,9 +2341,12 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     var sp = spF(), slow = fiF() === 0 ? 1 : 1 / fiF();
     e.age += dt;
     if (e.flash > 0) e.flash -= dt;
-    if (e.y < e.ty) e.y = Math.min(e.ty, e.y + (e.type === 'boss' ? 55 : 120) * dt);
+    if (e.leaving) { e.y -= 240 * dt; if (e.y < -110) { e.dead = true; } }
+    else if (e.y < e.ty) e.y = Math.min(e.ty, e.y + (e.summoned ? 170 : e.type === 'boss' ? 55 : 120) * dt);
     else e.arrived = true;
     e.x = e.ox + Math.sin(e.age * (e.type === 'boss' ? 0.5 : e.type === 'swarm' ? 1.5 : 0.9) + e.ph) * e.amp;
+    if (e.parent) e.x = e.parent.x + e.slot;
+    if (e.leaving) return;
     if (!e.arrived) return;
     var a, k, i2, T = diffT();
     if (e.type === 'drone') {
@@ -2369,6 +2376,58 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
             G.shake = Math.max(G.shake, 0.15); sfx('boom');
           }
         } else if (e.spT <= 0) { e.spT = 7; e.clodW = 0.8; }
+      }
+      if (!e.final && e.skin === 2) {
+        /* thunder eagle: every 7 s it flaps and rains about 10 feathers, each aimed at where the plane is at that moment */
+        e.spT = (e.spT == null ? 4 : e.spT) - dt;
+        if (e.flapW > 0) { e.flapW -= dt; if (e.flapW <= 0) { e.featN = 10; e.featT = 0; } }
+        else if (e.featN > 0) {
+          e.featT -= dt;
+          if (e.featT <= 0) {
+            e.featT = 0.07; e.featN--;
+            var fx = e.x + (e.featN % 2 ? 1 : -1) * (35 + Math.random() * 50), fy = e.y - 5 + Math.random() * 15;
+            var fa = Math.atan2(G.py - fy, G.px - fx) + (Math.random() - 0.5) * 0.06;
+            G.bullets.push({ x: fx, y: fy, vx: Math.cos(fa) * 340, vy: Math.sin(fa) * 340, r: 5, feather: true });
+            sfx('shot');
+          }
+        } else if (e.spT <= 0) { e.spT = 7; e.flapW = 0.6; }
+      }
+      if (!e.final && e.skin === 3) {
+        /* alien commander: every 7 s twelve beams burst out in all directions (blinks twice to show the paths first) */
+        e.spT = (e.spT == null ? 4 : e.spT) - dt;
+        if (!e.bm && e.spT <= 0) { e.spT = 7; e.bm = { tm: 0, base: Math.random() * TAU / 12 }; }
+        if (e.bm) {
+          e.bm.tm += dt;
+          if (e.bm.tm > 1.4) e.bm = null;
+          else if (e.bm.tm > 0.4) {
+            var bx0 = e.x, by0 = e.y + 10;
+            for (var bi = 0; bi < 12; bi++) {
+              var ba = e.bm.base + bi * TAU / 12, bex = Math.cos(ba), bey = Math.sin(ba);
+              var brx = G.px - bx0, bry = G.py - by0, bd = brx * bex + bry * bey;
+              if (bd < 0) continue;
+              var bdx = brx - bex * bd, bdy = bry - bey * bd;
+              if (G.inv <= 0 && Math.hypot(bdx, bdy) < 3 + bd * 0.035 + 4) hit();
+            }
+          }
+        }
+      }
+      if (e.final) {
+        /* galactic tyrant: every 7 s it calls a random boss to its head; at most two stay (a third sends the oldest back up) */
+        e.sumT -= dt;
+        if (e.sumT <= 0) {
+          e.sumT = 7;
+          var mins = G.enemies.filter(function (m) { return !m.dead && m.summoned && !m.leaving; });
+          var used = mins.map(function (m) { return m.skin; });
+          var pool = [0, 1, 2, 3].filter(function (k) { return used.indexOf(k) < 0; });
+          var kind = pool[Math.floor(Math.random() * pool.length)], slot;
+          if (mins.length >= 2) { var old = mins[0]; old.leaving = true; slot = old.slot; }
+          else if (mins.length === 1) slot = -mins[0].slot;
+          else slot = Math.random() < 0.5 ? -100 : 100;
+          spawnEnemy('boss', { kind: kind, bw: (kind + 1) * 4 });
+          var nb = G.enemies[G.enemies.length - 1];
+          nb.summoned = true; nb.parent = e; nb.slot = slot; nb.amp = 0; nb.ty = 105; nb.y = -90; nb.spT = 0.3; nb.x = e.x + slot;
+          burst(nb.x, 40, 30, '#c58bff', 260); announce('SUMMON', BOSS_NAMES[kind] + ' 소환!');
+        }
       }
       if (!e.final && e.skin === 1) {
         /* deep-sea octopus king: every 7 s two tentacles shoot straight at where the plane is */
@@ -2778,8 +2837,27 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     });
     ctx.restore();
   }
+  function drawAlienBeams(e) {
+    var bm = e.bm, ox = e.x, oy = e.y + 10, len = 1100;
+    ctx.save(); ctx.lineJoin = 'round';
+    var on = bm.tm < 0.4 ? (bm.tm < 0.1 || (bm.tm >= 0.2 && bm.tm < 0.3)) : true;
+    if (on) for (var i = 0; i < 12; i++) {
+      var a = bm.base + i * TAU / 12, ex = Math.cos(a), ey = Math.sin(a), nx = -ey, ny = ex;
+      var h0 = 3, h1 = 3 + len * 0.035;
+      ctx.beginPath(); ctx.moveTo(ox + nx * h0, oy + ny * h0); ctx.lineTo(ox + ex * len + nx * h1, oy + ey * len + ny * h1); ctx.lineTo(ox + ex * len - nx * h1, oy + ey * len - ny * h1); ctx.lineTo(ox - nx * h0, oy - ny * h0); ctx.closePath();
+      if (bm.tm < 0.4) {
+        ctx.globalAlpha = 0.18; ctx.fillStyle = '#7ef3ff'; ctx.fill(); ctx.globalAlpha = 0.9; ctx.setLineDash([10, 8]); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.6; ctx.stroke(); ctx.setLineDash([]);
+      } else {
+        var g = ctx.createLinearGradient(ox, oy, ox + ex * len, oy + ey * len);
+        g.addColorStop(0, 'rgba(255,255,255,0.95)'); g.addColorStop(0.3, 'rgba(255,90,200,0.85)'); g.addColorStop(1, 'rgba(160,60,255,0.55)');
+        ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.fill();
+        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + ex * len, oy + ey * len); ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2; ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
   function drawEagle(e) {
-    var F = e.flash > 0, t = e.age, K = function (c) { return F ? '#fff' : c; }, fw = Math.sin(t * 4) * 9;
+    var F = e.flash > 0, t = e.age, K = function (c) { return F ? '#fff' : c; }, fw = (e.flapW > 0 || e.featN > 0) ? Math.sin(t * 24) * 24 : Math.sin(t * 4) * 9;
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     /* electric aura */
     var ag = ctx.createRadialGradient(0, 0, 10, 0, 0, 90); ag.addColorStop(0, 'rgba(255,225,77,0.28)'); ag.addColorStop(1, 'rgba(255,225,77,0)');
@@ -2868,6 +2946,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   }
   function drawEnemy(e) {
     if (e.tents && e.tents.length) drawTents(e);
+    if (e.bm) drawAlienBeams(e);
     ctx.save(); ctx.translate(e.x, e.y);
     if (e.type === 'swarm') { ctx.lineJoin = 'round'; ctx.strokeStyle = C.outline; drawSwarm(e); ctx.restore(); return; }
     if (e.final) { ctx.scale(1.6, 1.6); ctx.lineWidth = 2; }
@@ -2914,6 +2993,10 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       ctx.beginPath(); ctx.arc(-cr * 0.3, 70 - cr * 0.3, cr * 0.3, 0, TAU); ctx.fillStyle = '#5e3c22'; ctx.fill();
     }
     ctx.restore();
+    if (e.summoned) {
+      ctx.fillStyle = C.outline; ctx.fillRect(e.x - 36, e.y + e.r + 22, 72, 7);
+      ctx.fillStyle = '#ff7ab0'; ctx.fillRect(e.x - 35, e.y + e.r + 23, 70 * Math.max(0, e.hp / e.maxHp), 5);
+    }
     if (e.type !== 'boss' && e.hp < e.maxHp) {
       ctx.fillStyle = C.outline; ctx.fillRect(e.x - 16, e.y + e.r + 6, 32, 5);
       ctx.fillStyle = C.sun; ctx.fillRect(e.x - 15, e.y + e.r + 7, 30 * Math.max(0, e.hp / e.maxHp), 3);
@@ -3388,6 +3471,14 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
 
     ctx.lineWidth = 2; ctx.strokeStyle = C.outline;
     G.bullets.forEach(function (b) {
+      if (b.feather) {
+        ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(Math.atan2(b.vy, b.vx));
+        ctx.beginPath(); ctx.moveTo(14, 0); ctx.quadraticCurveTo(0, -6, -12, 0); ctx.quadraticCurveTo(0, 6, 14, 0); ctx.closePath();
+        ctx.fillStyle = '#46558c'; ctx.fill(); ctx.lineWidth = 1.6; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(-11, 0); ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 1.8; ctx.stroke();
+        ctx.restore(); ctx.strokeStyle = C.outline; ctx.lineWidth = 2;
+        return;
+      }
       if (b.clod) {
         b.rot += 0.04;
         ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.rot);
@@ -3464,7 +3555,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     ctx.restore();
 
     var boss = null;
-    G.enemies.forEach(function (e) { if (e.type === 'boss') boss = e; });
+    G.enemies.forEach(function (e) { if (e.type === 'boss' && (!boss || !boss.final)) boss = e; });
     if (boss) {
       ctx.save(); ctx.translate(0, 22);
       ctx.fillStyle = C.outline; ctx.fillRect(38, 14, W - 76, boss.final ? 16 : 12);
