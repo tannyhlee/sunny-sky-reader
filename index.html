@@ -145,9 +145,11 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
 .chk input { width: 24px; height: 24px; flex: none; margin-top: 1px; accent-color: var(--accent-ink, #1f6feb); }
 .chk small { display: block; font-weight: 400; color: var(--soft); font-size: 0.8rem; margin-top: 2px; }
 .ov.ending { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
-.ov.ending { padding-top: 0; padding-bottom: 0; }
+.ov.ending { padding-top: 0; padding-bottom: 0; flex-direction: column; overflow: hidden; }
+.ov.ending::before { content: ''; flex: 2 1 0; min-height: 0; }
+.ov.ending::after { content: ''; flex: 1 1 0; min-height: 0; }
 .ov.ending .card { background: color-mix(in srgb, var(--panel) 40%, transparent); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); transition: background-color 0.25s;
-  height: 80%; max-height: 80%; margin: auto; display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; overflow: hidden; }
+  flex: 7 1 0; min-height: 0; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; overflow: hidden; }
 .ov.ending .card.solid { background: color-mix(in srgb, var(--panel) 58%, transparent); }
 .ov.ending .card h2 { font-size: clamp(1.25rem, 6vw, 1.7rem); white-space: nowrap; }
 .ov.ending .stats { gap: 5px; }
@@ -424,7 +426,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.25 · built 2026-10-04 23:26 (EST)</p>
+        <p class="ver" id="ver">v3.26 · built 2026-10-05 00:11 (EST)</p>
       </div>
     </div>
 
@@ -513,7 +515,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.25 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.26 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -2480,9 +2482,14 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       if (!e.final && e.skin === 1) {
         /* deep-sea octopus king: its two outer legs shoot out side by side toward the plane, keeping their spacing; the whole band is the danger zone */
         if (!e.tents) e.tents = [];
-        if (spFire) e.tents.push({ tx: G.px, ty: G.py, ph: 1, tm: 0, len: 0, max: 0, ang: 0 });
+        if (spFire) e.tents.push({ tx: G.px, ty: G.py, ph: 0, tm: 0, len: 0, max: 0, ang: -Math.PI / 2 });
         e.tents.forEach(function (tn) {
           var mx = e.x, my = e.y - 10;
+          if (tn.ph === 0) { /* wind-up: both outer legs rise high toward the top of the screen for 0.6 s, then aim at the plane */
+            tn.tm += dt; tn.ang = -Math.PI / 2; tn.len = Math.min(1, tn.tm / 0.25) * 230;
+            if (tn.tm >= 0.6) { tn.ph = 1; tn.tm = 0; tn.len = 0; tn.tx = G.px; tn.ty = G.py; }
+            return;
+          }
           tn.ang = Math.atan2(tn.ty - my, tn.tx - mx); tn.max = Math.hypot(tn.ty - my, tn.tx - mx) + 260;
           tn.tm += dt;
           if (tn.ph === 1) { tn.len = Math.min(tn.max, tn.len + 900 * dt); if (tn.len >= tn.max) { tn.ph = 2; tn.tm = 0; } }
@@ -2878,9 +2885,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       if (tn.len <= 0) return;
       var dx = Math.cos(tn.ang), dy = Math.sin(tn.ang), nx = -dy, ny = dx, L = tn.len, HW = 61;
       /* danger zone: the whole band between and around the two legs */
+      if (tn.ph !== 0) {
       ctx.beginPath(); ctx.moveTo(mx + nx * HW, my + ny * HW); ctx.lineTo(mx + dx * L + nx * HW, my + dy * L + ny * HW); ctx.lineTo(mx + dx * L - nx * HW, my + dy * L - ny * HW); ctx.lineTo(mx - nx * HW, my - ny * HW); ctx.closePath();
       ctx.globalAlpha = 0.22 + 0.08 * Math.sin(tt * 30); ctx.fillStyle = '#ff3d77'; ctx.fill();
       ctx.globalAlpha = 0.85; ctx.setLineDash([12, 8]); ctx.lineDashOffset = -tt * 120; ctx.strokeStyle = '#ff7aa8'; ctx.lineWidth = 3; ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      }
       /* the two legs */
       [-1, 1].forEach(function (sd) {
         var ox = mx + nx * 48 * sd, oy = my + ny * 48 * sd, n = Math.max(2, Math.ceil(L / 18));
