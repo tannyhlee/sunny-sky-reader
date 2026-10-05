@@ -145,7 +145,19 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
 .chk input { width: 24px; height: 24px; flex: none; margin-top: 1px; accent-color: var(--accent-ink, #1f6feb); }
 .chk small { display: block; font-weight: 400; color: var(--soft); font-size: 0.8rem; margin-top: 2px; }
 .ov.ending { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
-.ov.ending .card { background: color-mix(in srgb, var(--panel) 58%, transparent); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.ov.ending { padding-top: 0; padding-bottom: 0; }
+.ov.ending .card { background: color-mix(in srgb, var(--panel) 40%, transparent); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); transition: background-color 0.25s;
+  height: 80%; max-height: 80%; margin: auto; display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; overflow: hidden; }
+.ov.ending .card.solid { background: color-mix(in srgb, var(--panel) 58%, transparent); }
+.ov.ending .card h2 { font-size: clamp(1.25rem, 6vw, 1.7rem); white-space: nowrap; }
+.ov.ending .stats { gap: 5px; }
+.ov.ending .stats div { padding: 3px 6px; }
+.ov.ending .stats dt { font-size: 0.66rem; }
+.ov.ending .stats dd { font-size: 0.95rem; line-height: 1.15; }
+.ov.ending .endw, .ov.ending .bestline { font-size: 0.78rem; }
+.ov.ending .review { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.ov.ending .review ol { flex: 1 1 auto; min-height: 0; max-height: none; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.ov.ending .endbtns .go { padding: 0.35em 0.8em; }
 .card { margin: auto; width: 100%; max-width: 390px; background: var(--panel); border: 2px solid var(--ui-edge); border-radius: 14px; padding: 16px 18px; display: grid; gap: 10px; }
 .eyebrow { margin: 0; font-family: var(--font-type); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent-ink); }
 .card h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(1.6rem, 7vw, 2.2rem); line-height: 1.1; text-wrap: balance; }
@@ -412,7 +424,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.24 · built 2026-10-04 23:01 (EST)</p>
+        <p class="ver" id="ver">v3.25 · built 2026-10-04 23:26 (EST)</p>
       </div>
     </div>
 
@@ -501,7 +513,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.24 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.25 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -3792,11 +3804,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   function startReplay() {
     G.replay = { i: 0, t: 0, phase: 'gap', wait: 0.5, cur: null, zone: 0 }; BG.p = 0;
     G.enemies = []; G.bullets = []; G.spawnQ = []; G.turrets = []; G.items = []; G.ending = true; G.finalPending = false; G.finalMode = true;
-    G.tx = W / 2; G.ty = H - 90; G.hp = Math.max(1, G.hp);
+    G.tx = W / 2; G.ty = H - 36; G.hp = Math.max(1, G.hp);
   }
   function updateReplay(dt) {
     var r = G.replay;
-    G.ty = H - 90;
+    G.ty = H - 36;
     if (r.phase === 'gap') { G.tx = W / 2; r.wait -= dt; if (r.wait <= 0) replayBoss(r.i); return; }
     var e = r.cur;
     if (!e || e.dead) { r.phase = 'gap'; r.wait = 0.2; return; }
@@ -3816,19 +3828,19 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     var r = G.replay;
     r.phase = 'done'; r.cur = null;
     G.enemies = []; G.bullets = []; G.pb = []; G.orbPos = []; G.drones = []; G.ships = []; G.bombs = [];
-    var spots = [[0, 55, 125, 0.5], [1, 135, 125, 0.5], [4, W / 2, 112, 0.62], [2, W - 135, 125, 0.5], [3, W - 55, 125, 0.5]];
+    var spots = [[0, 55, 40, 0.5], [1, 135, 40, 0.5], [4, W / 2, 68, 0.6], [2, W - 135, 40, 0.5], [3, W - 55, 40, 0.5]];
     spots.forEach(function (sp, n) {
       if (sp[0] < 4) spawnEnemy('boss', { kind: sp[0], bw: 4 }); else spawnFinalBoss();
       var e = G.enemies[G.enemies.length - 1];
       e.deco = true; e.defeated = true; e.tilt = (n % 2 ? 1 : -1) * (n === 2 ? 0.12 : 0.3); e.arrived = true; e.x = sp[1]; e.y = sp[2]; e.sc = sp[3]; e.hp = e.maxHp; e.ph = n; e.baseY = sp[2];
     });
-    G.tx = W / 2; G.ty = H - 90;
+    G.tx = W / 2; G.ty = H - 36;
   }
   function updateReplayDone(dt) {
-    G.tx = W / 2; G.ty = H - 90;
+    G.tx = W / 2; G.ty = H - 36;
     G.px += (G.tx - G.px) * Math.min(1, dt * 4); G.py += (G.ty - G.py) * Math.min(1, dt * 4);
     G.pb.length = 0; G.bullets.length = 0;
-    G.enemies.forEach(function (e) { e.age += dt; e.y = e.baseY + 6 + Math.sin(e.age * 1.2 + e.ph) * 2.5; });
+    G.enemies.forEach(function (e) { e.age += dt; e.y = e.baseY + 4 + Math.sin(e.age * 1.2 + e.ph) * 2.5; });
     updateFx(dt);
   }
   function finish(cleared) {
@@ -3842,16 +3854,16 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     var newBest = G.score > best;
     if (newBest) { best = G.score; try { localStorage.setItem('sunnySkyReaderV3Best', String(best)); } catch (e) {} }
     $('oEye').textContent = cleared ? 'GAME CLEAR' : 'GAME OVER';
-    $('oTitle').textContent = cleared ? '축하해요, Sunny! 모두 해냈어요!' : '수고했어요, Sunny!';
+    $('oTitle').textContent = cleared ? 'Great job, Sunny!' : '수고했어요, Sunny!';
     $('oScore').textContent = G.score.toLocaleString('en-US');
-    $('oWave').textContent = cleared ? 'FINAL' : Math.max(1, G.wave);
+    $('oWave').textContent = Math.max(1, G.wave);
     $('oSent').textContent = G.read.filter(function (s) { return s[2]; }).length + '/' + G.read.length;
     $('oTime').textContent = fmtTime1(G.clock); updateClock();
     var bestT = 0, newT = false, tk = 'sunnySkyReaderV3BestTime' + dl;
     if (cleared) { try { bestT = +localStorage.getItem(tk) || 0; } catch (e) {} if (!bestT || G.clock < bestT) { newT = true; bestT = G.clock; try { localStorage.setItem(tk, String(bestT)); } catch (e) {} } }
     G.newTimeRecord = newT;
     $('oWeapons').textContent = G.slots.length
-      ? '무기: ' + G.slots.map(function (t) { return wname(t, G.lv[t]) + ' Lv' + G.lv[t]; }).join(', ') + ' · 광역 공격 Lv' + sweepLv() + (G.evo ? ' · 비행기 ' + EVO[G.evo].ko + ' Lv' + G.evo : '')
+      ? '무기: ' + G.slots.map(function (t) { return wname(t, G.lv[t]) + ' Lv' + G.lv[t]; }).join(', ')
       : '키운 무기가 아직 없어요. 다음에는 문장을 읽어 보세요!';
     $('oBest').textContent = (newBest ? '새 최고 점수예요! ' : '최고 점수 ' + best.toLocaleString('en-US') + ' · ') + '난이도 ' + DIFFS[dl].name + (cleared ? (newT ? ' · 새 최단 클리어 기록! ' : ' · 최단 클리어 ') + fmtTime1(bestT) : ' · 클리어하면 시간이 기록돼요(짧을수록 잘한 거예요)');
     var ol = $('oList');
@@ -3869,6 +3881,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       ol.appendChild(li);
     });
     $('btnSave').textContent = '기록 저장하기 (.txt)';
+    ol.scrollTop = 0; $('ovOver').querySelector('.card').classList.remove('solid');
     lockUntil = performance.now() + 1600;
     $('ovOver').classList.toggle('ending', !!cleared);
     if (cleared) startReplay();
@@ -4003,6 +4016,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     try { localStorage.setItem('sunnySkyV3Skip', skipSpeak ? '1' : '0'); } catch (e) {}
   });
   syncChecks();
+  (function () {
+    var card = $('ovOver').querySelector('.card'), rv = card.querySelector('.review'), tm = null;
+    function solid() { card.classList.add('solid'); clearTimeout(tm); tm = setTimeout(function () { if ($('oList').scrollTop <= 2) card.classList.remove('solid'); }, 3500); }
+    rv.addEventListener('scroll', solid, true); rv.addEventListener('pointerdown', solid); rv.addEventListener('touchstart', solid, { passive: true });
+  })();
   $('btnGear').addEventListener('click', function () { this.blur(); openPanel(); });
   $('btnPanelClose').addEventListener('click', function () { closePanel(); });
   $('btnPanelClose2').addEventListener('click', function () { closePanel(); });
