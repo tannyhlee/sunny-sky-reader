@@ -337,7 +337,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   background: var(--panel); border-top: 3px solid var(--ui-edge); border-radius: 18px 18px 0 0; padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
   display: grid; gap: 8px; box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.3); z-index: 4;
 }
-.sheet .shead { display: flex; justify-content: flex-end; align-items: center; margin: -2px 0 -4px; }
+.sheet .shead { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin: -2px 0 -4px; }
+.sheet .shead .tbtn:disabled { opacity: 0.4; cursor: not-allowed; }
 .sheet .shead .tbtn { padding: 0.35em 0.9em; font-size: 0.82rem; touch-action: manipulation; }
 .sheet .grab { display: none; justify-self: center; width: 44px; height: 4px; border-radius: 2px; background: var(--line); }
 .sheet .prompt { font-size: 0.84rem; text-align: center; }
@@ -430,7 +431,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.29 · built 2026-10-05 16:50 (EST)</p>
+        <p class="ver" id="ver">v3.31 · built 2026-10-05 17:41 (EST)</p>
       </div>
     </div>
 
@@ -468,7 +469,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     </div>
 
     <section class="sheet" id="sheet" hidden aria-label="문장 고르기">
-      <div class="shead"><button class="tbtn" id="btnRoundCancel" type="button">✕ 업그레이드 취소</button></div>
+      <div class="shead"><button class="tbtn" id="btnRoundOther" type="button">🔄 다른 무기 보기</button><button class="tbtn" id="btnRoundCancel" type="button">✕ 업그레이드 취소</button></div>
       <p class="prompt" id="prompt"></p>
       <div class="opts" id="opts"></div>
       <div class="say" id="say" hidden>
@@ -519,7 +520,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.29 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.31 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -1789,7 +1790,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       return '자율드론 ' + W4.n[L - 1] + '기 · 위력 ' + W4.dmg[L - 1];
     }
     if (t === 5) {
-      var sup = ' · 아래쪽에서 멈춰 안 고른 무기 3종을 함께 발사';
+      var sup = ' · 유저가 선택하지 않은 무기 3종을 함께 발사';
       if (L <= 5) return '모선이 지나가며 적 총알을 지워요 · 폭 ' + W5.w[L - 1] + sup;
       if (L === 6) return '전투 모선으로 진화! 포탑 2개로 공격해요' + sup;
       if (L === 10) return '초대형 모선 + 메가 빔 + 포탑 6개' + sup;
@@ -1925,14 +1926,22 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   }
 
   /* ---------- the three numbered sentences ---------- */
-  function nextRound() {
+  function nextRound(reroll) {
     if (G.ending) return;
     var types, finalR = false;
     if (G.slots.length < 2) {
       /* still choosing: the weapon already chosen is always offered; the other cards change every round */
+      /* the mothership (5) is not offered until both weapons are chosen */
       var must = G.slots.filter(function (t) { return G.lv[t] < 10; }), prev = G.lastTypes || [];
-      var pool = shuffle([1, 2, 3, 4, 5, 8].filter(function (t) { return must.indexOf(t) < 0; }));
-      var fresh = pool.filter(function (t) { return prev.indexOf(t) < 0; }), old = pool.filter(function (t) { return prev.indexOf(t) >= 0; });
+      var pool = shuffle([1, 2, 3, 4, 8].filter(function (t) { return must.indexOf(t) < 0; }));
+      var fresh, old;
+      if (reroll) { /* "other weapons": types not shown yet in this choosing screen come first */
+        var seenR = G.rSeen || [];
+        fresh = pool.filter(function (t) { return seenR.indexOf(t) < 0; });
+        old = pool.filter(function (t) { return seenR.indexOf(t) >= 0 && prev.indexOf(t) < 0; }).concat(pool.filter(function (t) { return prev.indexOf(t) >= 0; }));
+      } else {
+        fresh = pool.filter(function (t) { return prev.indexOf(t) < 0; }); old = pool.filter(function (t) { return prev.indexOf(t) >= 0; });
+      }
       types = must.concat(fresh.concat(old).slice(0, 3 - must.length));
     }
     else if (allMax()) {
@@ -1946,6 +1955,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     var picks = types.slice(0, 3);
     while (picks.length < 3) picks.push(6);
     var taken = [], mx = allMax();
+    G.rSeen = reroll ? (G.rSeen || []).concat(picks.filter(function (t) { return (G.rSeen || []).indexOf(t) < 0; })) : picks.slice();
+    if (G.slots.length < 2 && G.rSeen.length >= 5) G.rSeen = picks.slice();
     G.lastTypes = picks.slice();
     R.final = finalR;
     R.opts = picks.map(function (t) {
@@ -1960,10 +1971,18 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     voice.manual = false;
     renderOpts();
     showSay(false);
-    updateWeaponPanel();
+    updateWeaponPanel(); updateOtherBtn();
     $('prompt').textContent = finalR
       ? '마지막 보스! ' + (dl === 2 ? '어려운 문장이에요. ' : '') + '광역 공격·수리·무기 강화(대미지 +5%)를 골라 버텨요. 틀려도 레벨은 내려가지 않아요.'
       : (G.bonus ? '⭐ 보너스! ' : '') + '읽고 싶은 문장을 눌러요. 문장 뒤 괄호가 올라갈 무기예요.';
+  }
+  function updateOtherBtn() { $('btnRoundOther').disabled = G.slots.length >= 2 || R.stage === 'done'; }
+  function otherWeapons() {
+    if (!roundOpen || G.slots.length >= 2 || confirmOpen || mode !== 'play' || G.closeT > 0 || R.stage === 'done' || G.ending) return;
+    stopListening(); cancelSpeech(); clearPart();
+    nextRound(true);
+    $('sheet').scrollTop = 0;
+    tone(560, 0.1, 'triangle', 0.04);
   }
   function renderOpts() {
     var box = $('opts');
@@ -1980,6 +1999,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       wp.textContent = '(' + wname(o.t, o.lvl) + (o.t === 6 ? '' : ' Lv' + o.lvl) + ')';
       if (o.t === 7) wp.textContent = '(비행기 진화 Lv' + o.lvl + ' · ' + EVO[o.lvl].ko + ')';
       if (o.t === 9) wp.textContent = '(무기 강화 · 대미지 +5%)';
+      if (o.t === 5) wp.textContent = '(광역 공격, 1회성)';
       en.appendChild(wp);
       var ko = document.createElement('div'); ko.className = 'kor'; ko.textContent = o.ko;
       var up = document.createElement('div'); up.className = 'up'; up.textContent = o.t === 5 ? desc(5, o.lvl) + ' (레벨 자동)' : desc(o.t, o.lvl);
@@ -4444,6 +4464,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     this.blur();
     openMic(function (ok) { if (ok) { if (IS_MOBILE) closeMic(); leaveManual(); } });
   });
+  $('btnRoundOther').addEventListener('click', function () { this.blur(); otherWeapons(); });
   $('btnRoundCancel').addEventListener('click', function () { this.blur(); askCancel(); });
   $('btnConfirmYes').addEventListener('click', function () { cancelRound(); });
   $('btnConfirmNo').addEventListener('click', function () { hideConfirm(true); });
