@@ -39,6 +39,7 @@
   --wc6: #d6457d;
   --wc7: #0e9aa7;
   --wc8: #d9480f;
+  --wc9: #b86e00;
   --font-display: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
   --font-body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
   --font-type: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
@@ -50,7 +51,7 @@
     --sky-top: #0b1533; --sky-bottom: #4a2f6e; --cloud: rgba(170, 180, 255, 0.14);
     --star: rgba(255, 255, 255, 0.9); --enemy: #8da2dc; --outline: #050a18;
     --plane: #ffb92e; --bullet: #fff6c4; --ui-edge: #3a4b82;
-    --wc1: #ffc24d; --wc2: #ff6a5a; --wc3: #5cc8f2; --wc4: #4fd6ae; --wc5: #a58cff; --wc6: #ff8fb6; --wc7: #4fe0e0; --wc8: #ff8a3d;
+    --wc1: #ffc24d; --wc2: #ff6a5a; --wc3: #5cc8f2; --wc4: #4fd6ae; --wc5: #a58cff; --wc6: #ff8fb6; --wc7: #4fe0e0; --wc8: #ff8a3d; --wc9: #ffd24d;
     color-scheme: dark;
   }
 }
@@ -60,7 +61,7 @@
   --sky-top: #0b1533; --sky-bottom: #4a2f6e; --cloud: rgba(170, 180, 255, 0.14);
   --star: rgba(255, 255, 255, 0.9); --enemy: #8da2dc; --outline: #050a18;
   --plane: #ffb92e; --bullet: #fff6c4; --ui-edge: #3a4b82;
-  --wc1: #ffc24d; --wc2: #ff6a5a; --wc3: #5cc8f2; --wc4: #4fd6ae; --wc5: #a58cff; --wc6: #ff8fb6; --wc7: #4fe0e0; --wc8: #ff8a3d;
+  --wc1: #ffc24d; --wc2: #ff6a5a; --wc3: #5cc8f2; --wc4: #4fd6ae; --wc5: #a58cff; --wc6: #ff8fb6; --wc7: #4fe0e0; --wc8: #ff8a3d; --wc9: #ffd24d;
   color-scheme: dark;
 }
 
@@ -202,7 +203,7 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
   display: inline-block; white-space: nowrap; font-size: 0.78em; padding: 0.05em 0.5em; margin-left: 0.3em; border-radius: 6px;
   border: 1.5px solid var(--c); background: color-mix(in srgb, var(--c) 18%, transparent);
 }
-.opt .kor { color: var(--soft); font-size: 0.9rem; }
+.opt .kor { color: var(--fg); font-weight: 700; font-size: 0.9rem; }
 .opt .up { font-size: 0.78rem; color: var(--accent-ink); }
 .opt.sel { border-color: var(--sun); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sun) 35%, transparent); }
 .opt.dead { opacity: 0.5; cursor: not-allowed; }
@@ -406,7 +407,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.13 · built 2026-10-04 18:44 (EST)</p>
+        <p class="ver" id="ver">v3.14 · built 2026-10-04 19:55 (EST)</p>
       </div>
     </div>
 
@@ -495,7 +496,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.13 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.14 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -524,8 +525,9 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
           <li style="--c:var(--wc3)"><b>방어막 → APS → 아이언 돔</b> · 구체가 몸 주위를 돌며 총알을 막아요(레벨마다 1개씩, 거리 40~80). 6단계부터는 방어 구체 5개가 거리 80에 남고, 멀리(176~290)에서 도는 공격 구체 5개가 더해져요.</li>
           <li style="--c:var(--wc4)"><b>드론 → 자율드론 → 골든 윙</b> · 따라다니며 부채꼴로 쏴요. 6단계부터 알아서 날아다니고, 10단계는 골든 윙이에요.</li>
           <li style="--c:var(--wc8)"><b>폭발탄 → 소이탄 → 네이팜탄</b> · 1~5단계는 한 번 폭발, 6~9단계 소이탄은 땅을 태우고, 10단계 네이팜탄은 크게 타올라요.</li>
-          <li style="--c:var(--wc5)"><b>광역 공격(모선)</b> · 두 무기 레벨의 평균으로 <b>자동</b>으로 커져요. 적 총알을 지우고 나중엔 포탑과 메가 빔으로 공격해요.</li>
+          <li style="--c:var(--wc5)"><b>광역 공격(모선)</b> · 두 무기 레벨의 평균으로 <b>자동</b>으로 커져요. 적 총알을 지우고 나중엔 포탑과 메가 빔으로 공격해요. 모선이 지나가는 동안은 <b>내가 고르지 않은 무기 3종</b>도 평균 레벨로 함께 발사돼요.</li>
           <li style="--c:var(--wc6)"><b>수리</b> · 하트를 하나 회복해요.</li>
+          <li style="--c:var(--wc9)"><b>무기 강화</b> · 최종 보스 단계에서만 나와요. 고를 때마다 기본 공격과 내 두 무기의 대미지가 5%씩 늘어요.</li>
           <li style="--c:var(--wc7)"><b>비행기 진화</b> · 두 무기를 모두 10단계로 키우면 열려요. 팔콘 → 랩터 → 팬텀 → 노바 → 셀레스티얼. 최대 하트와 기본 총이 늘어나요.</li>
         </ul>
         <p style="margin-top:8px;font-size:0.82rem;color:var(--soft)">무기는 처음에 고른 <b>두 종류</b>만 키울 수 있어요. 위쪽 칸에 현재 무기와 레벨이 보여요.</p>
@@ -1252,7 +1254,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     5: { ko: '광역 공격', en: 'Mothership', evo: '전투 모선' },
     6: { ko: '수리', en: 'Repair', evo: '수리' },
     7: { ko: '비행기 진화', en: 'Evolve', evo: '비행기 진화' },
-    8: { ko: '폭발탄', en: 'Explosive Bomb', evo: '소이탄' }
+    8: { ko: '폭발탄', en: 'Explosive Bomb', evo: '소이탄' },
+    9: { ko: '무기 강화', en: 'Power Up', evo: '무기 강화' }
   };
   /* weapon 8 changes its name with its level: 1-5 Explosive Bomb, 6-9 Incendiary Bomb, 10 Napalm Bomb */
   var WN = { 1: ['총알', '레이저', '천광 레이저'], 2: ['미사일', '유도미사일', '천무 미사일'], 3: ['방어막', 'APS', '아이언 돔'], 4: ['드론', '자율드론', '골든 윙'] };
@@ -1328,12 +1331,14 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       return '자율드론 ' + W4.n[L - 1] + '기 · 위력 ' + W4.dmg[L - 1];
     }
     if (t === 5) {
-      if (L <= 5) return '모선이 지나가며 적 총알을 지워요 · 폭 ' + W5.w[L - 1];
-      if (L === 6) return '전투 모선으로 진화! 포탑 2개로 공격해요';
-      if (L === 10) return '초대형 모선 + 메가 빔 + 포탑 6개';
-      return '모선 포탑 ' + (L - 4) + '개' + (L >= 9 ? ' + 메가 빔' : '');
+      var sup = ' · 안 고른 무기 3종도 함께 발사';
+      if (L <= 5) return '모선이 지나가며 적 총알을 지워요 · 폭 ' + W5.w[L - 1] + sup;
+      if (L === 6) return '전투 모선으로 진화! 포탑 2개로 공격해요' + sup;
+      if (L === 10) return '초대형 모선 + 메가 빔 + 포탑 6개' + sup;
+      return '모선 포탑 ' + (L - 4) + '개' + (L >= 9 ? ' + 메가 빔' : '') + sup;
     }
     if (t === 7) return EVO[L].ko + ' · ' + EVO[L].d;
+    if (t === 9) return '기본 공격과 내 두 무기의 대미지 +5% (모두 합해 +' + (L * 5) + '%)';
     return '하트를 하나 회복해요';
   }
   var BIG = {
@@ -1473,7 +1478,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       types = must.concat(fresh.concat(old).slice(0, 3 - must.length));
     }
     else if (allMax()) {
-      if (G.evo >= 5) { finalR = true; types = [5, 6, Math.random() < 0.5 ? 5 : 6]; if (!G.finalMode) startFinal(); }
+      if (G.evo >= 5) { finalR = true; types = [5, 6, 9]; if (!G.finalMode) startFinal(); }
       else types = [5, 6, 7];
     } else {
       types = G.slots.filter(function (t) { return G.lv[t] < 10; });
@@ -1486,8 +1491,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     G.lastTypes = picks.slice();
     R.final = finalR;
     R.opts = picks.map(function (t) {
-      var lvl = t === 5 ? sweepLv() : t === 6 ? 1 : t === 7 ? G.evo + 1 : G.lv[t] + 1;
-      var tier = finalR ? (dl === 2 ? 3 : 2) : t === 7 ? 2 : t === 6 ? 2 : (lvl <= 3 ? 0 : lvl <= 7 ? 1 : 2);
+      var lvl = t === 5 ? sweepLv() : t === 6 ? 1 : t === 7 ? G.evo + 1 : t === 9 ? (G.pwr || 0) + 1 : G.lv[t] + 1;
+      var tier = finalR ? (dl === 2 ? 3 : 2) : t === 7 ? 2 : t === 6 || t === 9 ? 2 : (lvl <= 3 ? 0 : lvl <= 7 ? 1 : 2);
       var s = drawSentence(tier, taken);
       taken.push(s[0]);
       return { t: t, lvl: lvl, en: s[0], ko: s[1], fails: 0, dead: false, done: false };
@@ -1499,7 +1504,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     showSay(false);
     updateWeaponPanel();
     $('prompt').textContent = finalR
-      ? '마지막 보스! ' + (dl === 2 ? '어려운 문장이에요. ' : '') + '수리와 광역 공격으로 버텨요. 틀려도 레벨은 내려가지 않아요. 문장을 눌러 보세요.'
+      ? '마지막 보스! ' + (dl === 2 ? '어려운 문장이에요. ' : '') + '광역 공격·수리·무기 강화(대미지 +5%)를 골라 버텨요. 틀려도 레벨은 내려가지 않아요.'
       : (G.bonus ? '⭐ 보너스! ' : '') + '읽고 싶은 문장을 눌러요. 문장 뒤 괄호가 올라갈 무기예요.';
   }
   function renderOpts() {
@@ -1516,6 +1521,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       var wp = document.createElement('span'); wp.className = 'wp';
       wp.textContent = '(' + wname(o.t, o.lvl) + (o.t === 6 ? '' : ' Lv' + o.lvl) + ')';
       if (o.t === 7) wp.textContent = '(비행기 진화 Lv' + o.lvl + ' · ' + EVO[o.lvl].ko + ')';
+      if (o.t === 9) wp.textContent = '(무기 강화 · 대미지 +5%)';
       en.appendChild(wp);
       var ko = document.createElement('div'); ko.className = 'kor'; ko.textContent = o.ko;
       var up = document.createElement('div'); up.className = 'up'; up.textContent = o.t === 5 ? desc(5, o.lvl) + ' (레벨 자동)' : desc(o.t, o.lvl);
@@ -1757,7 +1763,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       startListening();
     }
   }
-  function labelOf(o) { return o.t === 6 ? '수리' : o.t === 7 ? WT[7].ko + ' Lv' + o.lvl + ' (' + EVO[o.lvl].ko + ')' : wname(o.t, o.lvl) + ' Lv' + o.lvl; }
+  function labelOf(o) { return o.t === 6 ? '수리' : o.t === 9 ? '무기 강화 (+' + (o.lvl * 5) + '%)' : o.t === 7 ? WT[7].ko + ' Lv' + o.lvl + ' (' + EVO[o.lvl].ko + ')' : wname(o.t, o.lvl) + ' Lv' + o.lvl; }
   function failOption() {
     var o = R.opts[R.sel];
     stopListening();
@@ -1816,6 +1822,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       announce('EVOLUTION! ' + EVO[o.lvl].n, '비행기 진화 Lv' + o.lvl + ' · ' + EVO[o.lvl].d);
       burst(G.px, G.py, 40, C.sun, 300); G.flash = 0.4; G.shake = 0.3;
       sfx('level');
+    } else if (t === 9) {
+      G.pwr = (G.pwr || 0) + 1; G.dmgMul = 1 + 0.05 * G.pwr;
+      announce('POWER UP! +' + (G.pwr * 5) + '%', '기본 공격과 두 무기의 대미지가 모두 5% 늘었어요');
+      burst(G.px, G.py, 30, C.sun, 260); G.flash = 0.2;
+      sfx('level');
     } else {
       if (G.hp < G.maxHp) G.hp++; else G.score += 500;
       announce('REPAIR', G.hp < G.maxHp + 1 ? '하트가 하나 회복됐어요!' : '');
@@ -1825,6 +1836,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   }
 
   /* ---------- player weapons ---------- */
+  function B(t) { return (t === 0 || G.slots.indexOf(t) >= 0) ? (G.dmgMul || 1) : 1; }
   function pbPush(b) { b.hits = []; G.pb.push(b); }
   function fireAll(dt) {
     /* base gun, always on */
@@ -1834,7 +1846,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       var bn = [1, 2, 3, 5, 7, 9][G.evo], bd = [1, 1, 1.5, 1.5, 2, 2.4][G.evo];
       /* fan: widest at evo 5 = a bullet fired from the bottom edge reaches the side edges of the screen at the top */
       var fanMax = Math.atan((W / 2) / (H - 40)) * (G.evo / 5);
-      for (var bq = 0; bq < bn; bq++) { var bu = bn === 1 ? 0 : (bq / (bn - 1) - 0.5) * 2, fa = bu * fanMax; pbPush({ x: G.px + bu * (bn - 1) * 3, y: G.py - 20, vx: 600 * Math.tan(fa), vy: -600, dmg: 1.1 * bd, r: 3.5, kind: 'g' }); }
+      for (var bq = 0; bq < bn; bq++) { var bu = bn === 1 ? 0 : (bq / (bn - 1) - 0.5) * 2, fa = bu * fanMax; pbPush({ x: G.px + bu * (bn - 1) * 3, y: G.py - 20, vx: 600 * Math.tan(fa), vy: -600, dmg: 1.1 * bd * B(0), r: 3.5, kind: 'g' }); }
     }
     /* 8: incendiary / napalm bombs */
     if (G.lv[8]) {
@@ -1850,7 +1862,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         var n = W1.n[L - 1];
         for (var q = 0; q < n; q++) {
           var u = n === 1 ? 0 : (q / (n - 1) - 0.5) * 2;
-          pbPush({ x: G.px + u * (n - 1) * 6.5, y: G.py - 20, vx: u * 14 * (n > 3 ? 1 : 0), vy: -640, dmg: W1.dmg[L - 1], r: 4, kind: 'b' });
+          pbPush({ x: G.px + u * (n - 1) * 6.5, y: G.py - 20, vx: u * 14 * (n > 3 ? 1 : 0), vy: -640, dmg: W1.dmg[L - 1] * B(1), r: 4, kind: 'b' });
         }
       }
     }
@@ -1862,7 +1874,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         G.enemies.forEach(function (e) {
           if (e.dead) return;
           for (var k = 0; k < bl.length; k++) {
-            if (rayHit(bl[k], e)) { damage(e, bl[k].dps * 0.1); if (Math.random() < 0.35) G.parts.push({ x: e.x + rnd(-8, 8), y: e.y + e.r * 0.6, vx: rnd(-60, 60), vy: rnd(-90, -20), life: 0.3, max: 0.3, r: 2, col: '#bfe8ff' }); }
+            if (rayHit(bl[k], e)) { damage(e, bl[k].dps * 0.1 * B(1)); if (Math.random() < 0.35) G.parts.push({ x: e.x + rnd(-8, 8), y: e.y + e.r * 0.6, vx: rnd(-60, 60), vy: rnd(-90, -20), life: 0.3, max: 0.3, r: 2, col: '#bfe8ff' }); }
           }
         });
       }
@@ -1878,7 +1890,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
           var mu = mn === 1 ? 0 : (m / (mn - 1) - 0.5) * 2;
           var ang = homing ? mu * 1.1 : mu * 0.12;
           var sp = homing ? 250 : 380;
-          pbPush({ x: G.px + mu * 16, y: G.py - 4, vx: Math.sin(ang) * sp, vy: -Math.cos(ang) * sp, dmg: W2.dmg[L - 1],
+          pbPush({ x: G.px + mu * 16, y: G.py - 4, vx: Math.sin(ang) * sp, vy: -Math.cos(ang) * sp, dmg: W2.dmg[L - 1] * B(2),
                    r: 5 + (L >= 8 ? 2 : 0) + (L === 10 ? 2 : 0), kind: 'm', home: homing, spl: W2.spl[L - 1], lvl: L, life: 4 });
         }
       }
@@ -1941,7 +1953,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         G.enemies.forEach(function (e) {
           if (e.dead) return;
           var dx = e.x - o.x, dy = e.y - o.y, rr = e.r + o.r;
-          if (dx * dx + dy * dy < rr * rr) { damage(e, o.dps * 0.15); G.parts.push({ x: o.x, y: o.y, vx: rnd(-80, 80), vy: rnd(-80, 80), life: 0.25, max: 0.25, r: 2, col: L >= 10 ? '#ffe14d' : '#9a8cff' }); }
+          if (dx * dx + dy * dy < rr * rr) { damage(e, o.dps * 0.15 * B(3)); G.parts.push({ x: o.x, y: o.y, vx: rnd(-80, 80), vy: rnd(-80, 80), life: 0.25, max: 0.25, r: 2, col: L >= 10 ? '#ffe14d' : '#9a8cff' }); }
         });
       });
     }
@@ -1970,12 +1982,12 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       G.enemies.forEach(function (e) {
         if (e.dead) return;
         var dx = e.x - b.x1, dy = e.y - b.y1, rr = R + e.r;
-        if (dx * dx + dy * dy < rr * rr) damage(e, W8.dmg[L - 1]);
+        if (dx * dx + dy * dy < rr * rr) damage(e, W8.dmg[L - 1] * B(8));
       });
       G.fires.push({ x: b.x1, y: b.y1, r: R, dur: 0.45, t: 0, napalm: false, L: L });
       burst(b.x1, b.y1, 14, '#ff9f1c', 230); burst(b.x1, b.y1, 6, '#fff3b0', 160);
     } else {
-      G.fires.push({ x: b.x1, y: b.y1, r: R, dur: W8.dur[L - 6], t: 0, napalm: true, L: L, dps: W8.dps[L - 6], tick: 0, seed: Math.random() * 100 });
+      G.fires.push({ x: b.x1, y: b.y1, r: R, dur: W8.dur[L - 6], t: 0, napalm: true, L: L, dps: W8.dps[L - 6] * B(8), tick: 0, seed: Math.random() * 100 });
       burst(b.x1, b.y1, L === 10 ? 26 : 14, '#ff7a1a', 260); burst(b.x1, b.y1, 8, '#fff3b0', 200);
     }
     sfx('boom');
@@ -2069,7 +2081,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         var shots = L === 10 ? 2 : 1;
         for (var sh = 0; sh < shots; sh++) {
           var so = shots === 1 ? 0 : (sh - 0.5) * 11;
-          pbPush({ x: d.x + Math.cos(ang + Math.PI / 2) * so, y: d.y + Math.sin(ang + Math.PI / 2) * so, vx: Math.cos(ang) * 540, vy: Math.sin(ang) * 540, dmg: W4.dmg[L - 1], r: L >= 9 ? 4.5 : 3, kind: 'd', lvl: L, pierce: L >= 9 ? 1 : 0 });
+          pbPush({ x: d.x + Math.cos(ang + Math.PI / 2) * so, y: d.y + Math.sin(ang + Math.PI / 2) * so, vx: Math.cos(ang) * 540, vy: Math.sin(ang) * 540, dmg: W4.dmg[L - 1] * B(4), r: L >= 9 ? 4.5 : 3, kind: 'd', lvl: L, pierce: L >= 9 ? 1 : 0 });
         }
       }
     });
@@ -2142,10 +2154,14 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   /* ---------- enemies ---------- */
   var ED = { drone: { hp: 3, r: 16, score: 100 }, wing: { hp: 6, r: 22, score: 200 }, spinner: { hp: 10, r: 20, score: 300 },
              tank: { hp: 14, r: 24, score: 400 }, swarm: { hp: 1.5, r: 11, score: 40 }, boss: { hp: 160, r: 46, score: 3000 } };
+  /* the final stage starts once every enemy already on screen is defeated; nothing is cleared automatically */
   function startFinal() {
-    G.finalMode = true; G.spawnQ = []; G.waveClear = false; G.nextWave = 1e9;
-    G.enemies.forEach(function (e) { if (!e.dead) { e.dead = true; burst(e.x, e.y, 14, C.enemy, 200); } });
-    G.bullets.length = 0;
+    G.finalMode = true; G.finalPending = true; G.finalWait = 0; G.spawnQ = []; G.waveClear = false; G.nextWave = 1e9;
+    announce('FINAL STAGE', '남은 적을 모두 물리치면 마지막 보스가 나타나요!');
+    updateHUD();
+  }
+  function spawnFinalBoss() {
+    G.finalPending = false; G.roundAt = G.time;
     var D = DIFFS[dl], hp = Math.round(FINAL_HP * D.hp);
     G.enemies.push({ type: 'boss', skin: 3, final: true, def: D.fdef, x: W / 2, y: -90, ox: W / 2, amp: 120, hp: hp, maxHp: hp, r: 74,
       ty: 135, age: 0, fireT: 1.5, ph: 0, ang: 0, flash: 0, dead: false, arrived: false, escT: 9 });
@@ -2369,11 +2385,15 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     /* how fast the player is scoring right now (points per second, smoothed) -> the next sentence comes after ~SECS_PER_ROUND seconds of play */
     if (dt > 0) G.rate += ((G.killScore - G.ksPrev) / dt - G.rate) * Math.min(1, dt / 20);
     G.ksPrev = G.killScore;
-    if (!G.ending && (G.killScore >= G.goal || (G.finalMode && G.time - G.roundAt > 24))) { openRound(); return; }
+    if (!G.ending && (G.killScore >= G.goal || (G.finalMode && !G.finalPending && G.time - G.roundAt > 24))) { openRound(); return; }
 
     G.time += dt;
     if (G.inv > 0) G.inv -= dt;
 
+    /* while a mothership is on screen, the 3 weapons the player did NOT choose fire too, at the mothership's (average) level */
+    var gwant = 0;
+    if (G.slots.length === 2) G.ships.forEach(function (m) { gwant = Math.max(gwant, m.L); });
+    [1, 2, 3, 4, 8].forEach(function (gt) { if (G.slots.indexOf(gt) < 0) G.lv[gt] = gwant; });
     fireAll(dt);
     updateOrbs(dt);
     updateDrones(dt);
@@ -2390,6 +2410,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (G.waveClear && G.wave === 0 && R.stage === 'none') { /* wait for the first round to be created */ }
     if (G.waveClear && !G.finalMode) { G.nextWave -= dt; if (G.nextWave <= 0) startWave(); }
     G.enemies.forEach(function (e) { if (!e.dead) enemyAI(e, dt); });
+    if (G.finalPending) { G.finalWait += dt; if (G.finalWait > 60 || !G.enemies.some(function (e) { return !e.dead; })) spawnFinalBoss(); }
     maybeTip();
     /* ground turrets drift down with the ground and leave the screen; touching one costs a heart */
     G.turrets.forEach(function (t) {
@@ -2967,36 +2988,73 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       g.addColorStop(0.7, 'rgba(255,225,120,0.75)'); g.addColorStop(1, 'rgba(255,200,60,0)');
       ctx.fillStyle = g; ctx.fillRect(-bw / 2 * flick, -m.y, bw * flick, m.y - h * 0.4);
     }
-    /* engines */
-    var ne = Math.max(3, Math.round(w / 70));
-    for (var k = 0; k < ne; k++) {
-      var ex = (ne === 1 ? 0 : (k / (ne - 1) - 0.5) * w * 0.7);
-      var fl = 16 + Math.random() * 12 + w / 40;
-      ctx.beginPath(); ctx.moveTo(ex - 8, h * 0.5); ctx.lineTo(ex + 8, h * 0.5); ctx.lineTo(ex, h * 0.5 + fl); ctx.closePath();
-      ctx.fillStyle = '#ff9f1c'; ctx.fill();
+    var fk = 1 + Math.sin(G.time * 38 + w) * 0.12;
+    /* engine plumes: two big nacelle jets + a centre jet */
+    [[-0.165, 0.46, 1], [0.165, 0.46, 1], [0, 0.44, 0.8]].forEach(function (j) {
+      var jx = j[0] * w, jy = j[1] * h, jl = (h * 0.55 + Math.random() * h * 0.2) * j[2] * fk, jw = Math.max(5, w * 0.03) * (j[2] > 0.9 ? 1 : 0.8);
+      var jg = ctx.createLinearGradient(0, jy, 0, jy + jl);
+      jg.addColorStop(0, 'rgba(255,255,255,0.95)'); jg.addColorStop(0.25, 'rgba(120,220,255,0.85)'); jg.addColorStop(1, 'rgba(70,90,255,0)');
+      ctx.beginPath(); ctx.moveTo(jx - jw, jy); ctx.lineTo(jx + jw, jy); ctx.lineTo(jx, jy + jl); ctx.closePath(); ctx.fillStyle = jg; ctx.fill();
+    });
+    /* swept crescent wings (mirrored) */
+    [1, -1].forEach(function (sd) {
+      ctx.save(); ctx.scale(sd, 1);
+      ctx.beginPath();
+      ctx.moveTo(w * 0.08, -h * 0.02);
+      ctx.quadraticCurveTo(w * 0.3, -h * 0.2, w * 0.5, -h * 0.46);
+      ctx.lineTo(w * 0.44, -h * 0.06);
+      ctx.lineTo(w * 0.33, h * 0.2);
+      ctx.lineTo(w * 0.2, h * 0.26);
+      ctx.lineTo(w * 0.1, h * 0.3);
+      ctx.closePath();
+      var wg = ctx.createLinearGradient(0, 0, w * 0.5, 0);
+      wg.addColorStop(0, '#46568c'); wg.addColorStop(1, '#232c52');
+      ctx.fillStyle = wg; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = C.outline; ctx.stroke();
+      /* glowing leading-edge blade */
+      ctx.beginPath(); ctx.moveTo(w * 0.1, -h * 0.03); ctx.quadraticCurveTo(w * 0.3, -h * 0.2, w * 0.49, -h * 0.44);
+      ctx.lineWidth = 2.2; ctx.strokeStyle = C.w5; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(w * 0.14, h * 0.04); ctx.lineTo(w * 0.4, -h * 0.04); ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(150,220,255,0.55)'; ctx.stroke();
+      /* nacelle */
+      ctx.beginPath(); ctx.moveTo(w * 0.13, -h * 0.02); ctx.lineTo(w * 0.2, h * 0.04); ctx.lineTo(w * 0.21, h * 0.42); ctx.lineTo(w * 0.12, h * 0.47); ctx.closePath();
+      var ng = ctx.createLinearGradient(w * 0.12, 0, w * 0.21, 0); ng.addColorStop(0, '#26305a'); ng.addColorStop(1, '#5f70a6');
+      ctx.fillStyle = ng; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = C.outline; ctx.stroke();
+      ctx.beginPath(); ctx.arc(w * 0.165, h * 0.455, Math.max(3, w * 0.022), 0, TAU); ctx.fillStyle = '#bff3ff'; ctx.fill();
+      /* wing-tip nav light */
+      ctx.beginPath(); ctx.arc(w * 0.495, -h * 0.43, 2.6, 0, TAU);
+      ctx.fillStyle = (Math.floor(G.time * 3) % 2) ? (sd > 0 ? '#5dff9a' : '#ff5d6e') : '#fff'; ctx.fill();
+      ctx.restore();
+    });
+    /* needle hull */
+    poly([[0, -h * 0.64], [w * 0.045, -h * 0.4], [w * 0.085, -h * 0.1], [w * 0.1, h * 0.25], [w * 0.075, h * 0.45], [-w * 0.075, h * 0.45], [-w * 0.1, h * 0.25], [-w * 0.085, -h * 0.1], [-w * 0.045, -h * 0.4]]);
+    var hg = ctx.createLinearGradient(-w * 0.1, 0, w * 0.1, 0);
+    hg.addColorStop(0, '#3a4880'); hg.addColorStop(0.45, '#c3d2f4'); hg.addColorStop(0.55, '#aebfe8'); hg.addColorStop(1, '#34417a');
+    ctx.fillStyle = hg; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = C.outline; ctx.stroke();
+    /* armour plate lines */
+    ctx.lineWidth = 1.3; ctx.strokeStyle = 'rgba(22,34,58,0.55)';
+    [-0.28, -0.05, 0.16, 0.34].forEach(function (yy) { ctx.beginPath(); ctx.moveTo(-w * 0.075, h * yy); ctx.lineTo(w * 0.075, h * yy); ctx.stroke(); });
+    /* energy core stripe */
+    var cg = ctx.createLinearGradient(0, -h * 0.5, 0, h * 0.4);
+    cg.addColorStop(0, 'rgba(165,140,255,0)'); cg.addColorStop(0.5, 'rgba(165,140,255,0.95)'); cg.addColorStop(1, 'rgba(120,220,255,0.9)');
+    ctx.fillStyle = cg; ctx.fillRect(-w * 0.012, -h * 0.5, w * 0.024, h * 0.9);
+    /* bridge canopy */
+    poly([[0, -h * 0.32], [w * 0.035, -h * 0.18], [0, -h * 0.07], [-w * 0.035, -h * 0.18]]);
+    var bg2 = ctx.createLinearGradient(0, -h * 0.32, 0, -h * 0.07); bg2.addColorStop(0, '#e6fbff'); bg2.addColorStop(1, '#3aa8e8');
+    ctx.fillStyle = bg2; ctx.fill(); ctx.lineWidth = 1.8; ctx.strokeStyle = C.outline; ctx.stroke();
+    /* prow emitter glows when the mega beam is on */
+    if (m.beam || m.L >= 9) {
+      var og = ctx.createRadialGradient(0, -h * 0.62, 1, 0, -h * 0.62, 12 + (m.beam ? 8 : 0));
+      og.addColorStop(0, 'rgba(255,255,255,1)'); og.addColorStop(1, 'rgba(255,200,60,0)');
+      ctx.fillStyle = og; ctx.beginPath(); ctx.arc(0, -h * 0.62, 12 + (m.beam ? 8 : 0), 0, TAU); ctx.fill();
     }
-    /* hull */
-    poly([[-w / 2, h * 0.15], [-w * 0.38, -h * 0.15], [-w * 0.12, -h * 0.5], [0, -h * 0.58], [w * 0.12, -h * 0.5], [w * 0.38, -h * 0.15], [w / 2, h * 0.15], [w * 0.46, h * 0.5], [-w * 0.46, h * 0.5]]);
-    var hg = ctx.createLinearGradient(0, -h / 2, 0, h / 2);
-    hg.addColorStop(0, '#8e9bc4'); hg.addColorStop(1, '#4b5a8a');
-    ctx.fillStyle = hg; ctx.fill();
-    ctx.lineWidth = 3; ctx.strokeStyle = C.outline; ctx.stroke();
-    /* stripe + lights */
-    ctx.fillStyle = C.w5; ctx.globalAlpha = 0.85;
-    ctx.fillRect(-w * 0.4, h * 0.18, w * 0.8, h * 0.1); ctx.globalAlpha = 1;
-    var nl = Math.max(4, Math.round(w / 28));
-    for (var q = 0; q < nl; q++) {
-      var lx = (q / (nl - 1) - 0.5) * w * 0.76;
-      ctx.beginPath(); ctx.arc(lx, h * 0.34, 2.6, 0, TAU);
-      ctx.fillStyle = (Math.floor(G.time * 4) + q) % 2 ? '#ffe27a' : '#fff'; ctx.fill();
-    }
-    ctx.beginPath(); ctx.ellipse(0, -h * 0.18, w * 0.07, h * 0.12, 0, 0, TAU); ctx.fillStyle = '#d7efff'; ctx.fill(); ctx.lineWidth = 2; ctx.stroke();
-    /* turrets */
+    /* gun pods where the turrets actually fire from */
     if (m.L >= 6) {
       var nt = m.L - 4;
       for (var t = 0; t < nt; t++) {
-        var tx = (nt === 1 ? 0 : (t / (nt - 1) - 0.5) * w * 0.78);
-        ctx.beginPath(); ctx.arc(tx, -h * 0.3, 6 + (m.L >= 9 ? 1.5 : 0), 0, TAU); ctx.fillStyle = C.sun; ctx.fill(); ctx.lineWidth = 2; ctx.stroke();
+        var tx = (nt === 1 ? 0 : (t / (nt - 1) - 0.5) * w * 0.78), ty = -h * 0.3, pr = 5 + (m.L >= 9 ? 1.5 : 0);
+        ctx.fillStyle = '#242d52'; ctx.fillRect(tx - 1.8, ty - pr - 6, 3.6, 8);
+        ctx.lineWidth = 1.5; ctx.strokeStyle = C.outline; ctx.strokeRect(tx - 1.8, ty - pr - 6, 3.6, 8);
+        ctx.beginPath(); ctx.arc(tx, ty, pr, 0, TAU); ctx.fillStyle = C.sun; ctx.fill(); ctx.lineWidth = 2; ctx.stroke();
+        ctx.beginPath(); ctx.arc(tx, ty, pr * 0.4, 0, TAU); ctx.fillStyle = '#fff'; ctx.fill();
       }
     }
     ctx.restore();
@@ -3534,7 +3592,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       start: doStart, openRound: openRound, closeRound: closeRound, layout: layout, H: function () { return H; }, panel: openPanel,
       setLv: function (o) { for (var k in o) { G.lv[k] = o[k]; if (G.slots.indexOf(+k) < 0 && G.slots.length < 2) G.slots.push(+k); } wpKey = ''; updateWeaponPanel(); },
       ship: launchShip, spawn: spawnEnemy, wave: function () { startWave(); }, nextRound: nextRound,
-      voice: function () { return voiceEn && (voiceEn.name + '|' + voiceEn.voiceURI); }, setBg: function (v) { BG.p = v; }, bgp: function () { return BG.p; }, select: selectOpt, mean: meanLv, T: diffT, hpF: hpF, setEvo: function (n) { G.evo = n; G.maxHp = maxHpFor(n); wpKey = ''; updateWeaponPanel(); updateHUD(); }, final: startFinal, finish: finish, save: saveRecord, setDl: setDiff
+      voice: function () { return voiceEn && (voiceEn.name + '|' + voiceEn.voiceURI); }, setBg: function (v) { BG.p = v; }, bgp: function () { return BG.p; }, select: selectOpt, mean: meanLv, T: diffT, hpF: hpF, setEvo: function (n) { G.evo = n; G.maxHp = maxHpFor(n); wpKey = ''; updateWeaponPanel(); updateHUD(); }, final: function () { startFinal(); spawnFinalBoss(); }, finish: finish, save: saveRecord, setDl: setDiff
     };
   }
 })();
