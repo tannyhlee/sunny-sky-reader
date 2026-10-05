@@ -141,6 +141,9 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
   background: color-mix(in srgb, var(--panel) 80%, transparent);
   backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
 }
+.chk { display: flex; align-items: flex-start; gap: 10px; padding: 8px 4px; font-weight: 700; cursor: pointer; }
+.chk input { width: 24px; height: 24px; flex: none; margin-top: 1px; accent-color: var(--accent-ink, #1f6feb); }
+.chk small { display: block; font-weight: 400; color: var(--soft); font-size: 0.8rem; margin-top: 2px; }
 .ov.ending { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .ov.ending .card { background: color-mix(in srgb, var(--panel) 58%, transparent); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
 .card { margin: auto; width: 100%; max-width: 390px; background: var(--panel); border: 2px solid var(--ui-edge); border-radius: 14px; padding: 16px 18px; display: grid; gap: 10px; }
@@ -223,7 +226,7 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
 .say-t span { font-size: 0.8rem; color: var(--soft); }
 .say-t .heard { font-family: var(--font-type); font-weight: 700; font-size: 0.9rem; color: var(--fg); min-height: 1.3em; overflow-wrap: anywhere; }
 .say .go { font-size: 1rem; padding: 0.5em 0.9em; }
-.say-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.say-btns { justify-content: flex-end; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .strikes { display: inline-flex; align-items: center; gap: 3px; margin-left: 0.4em; vertical-align: middle; }
 .strikes i { width: 0.7em; height: 0.7em; border-radius: 50%; border: 1.5px solid var(--coral); }
 .strikes i.on { background: var(--coral); }
@@ -409,7 +412,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.22 · built 2026-10-04 22:50 (EST)</p>
+        <p class="ver" id="ver">v3.24 · built 2026-10-04 23:01 (EST)</p>
       </div>
     </div>
 
@@ -498,7 +501,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.22 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.24 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -534,7 +537,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </ul>
         <p style="margin-top:8px;font-size:0.82rem;color:var(--soft)">무기는 처음에 고른 <b>두 종류</b>만 키울 수 있어요. 위쪽 칸에 현재 무기와 레벨이 보여요.</p>
       </section>
-      <button class="go alt" id="btnTipReset" type="button" style="font-size:0.9rem;padding:0.5em 0.9em">💬 처음 설명 말풍선 다시 보기</button>
+      <label class="chk"><input type="checkbox" id="chkTips"><span>💬 처음 설명을 다시 보여줄게요</span></label>
+      <label class="chk"><input type="checkbox" id="chkSkip"><span>🤫 말하지 않고 넘어갈게요 <small>(문장을 읽어주지도, 마이크로 듣지도 않고 "확인했어요" 버튼으로 통과해요)</small></span></label>
       <button class="go pclose-wide" id="btnPanelClose2">닫고 계속하기</button>
     </div>
   </div>
@@ -1677,6 +1681,17 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     stopListening();
     speak(o.en, listenSoon);
   }
+  var skipSpeak = false;
+  try { skipSpeak = localStorage.getItem('sunnySkyV3Skip') === '1'; } catch (e) {}
+  /* "skip speaking": no voice, no mic -> just a confirm button at the lower right */
+  function goSkip() {
+    stopListening(); cancelSpeech();
+    voice.manual = true; R.sayLeft = 0;
+    $('sayState').textContent = '말하지 않고 넘어가요. 문장과 뜻을 읽어 본 뒤 "확인했어요"를 눌러 주세요.';
+    setSayLive(true);
+    $('btnSaid').textContent = '확인했어요'; $('btnSaid').hidden = false; $('btnSaid').disabled = false;
+    $('btnMicRetry').hidden = true;
+  }
   function startListening() {
     if (R.stage !== 'read' || voice.on || voice.manual) return;
     var gen = ++voice.gen, gotFinal = false, sel = R.sel;
@@ -1732,7 +1747,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     R.sayLeft = R.sayWait;
   }
   function leaveManual() {
-    if (R.stage !== 'read' || !voice.manual) return;
+    if (R.stage !== 'read' || !voice.manual || skipSpeak) return;
     voice.manual = false;
     R.sayLeft = 0;
     $('btnSaid').hidden = true; $('btnMicRetry').hidden = true;
@@ -1756,6 +1771,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     $('btnSaid').hidden = true; $('btnMicRetry').hidden = true; $('heard').textContent = '';
     showSay(true); updateStrikes(); paintOpts();
     tone(660, 0.1, 'triangle', 0.04);
+    $('btnSaid').textContent = '읽었어요!';
+    if (skipSpeak) { goSkip(); return; }
     if (!SR) { goManual('unsupported'); return; }
     if (micAsk === 'denied') { goManual('not-allowed'); return; }
     if (micAsk === 'off') { goManual('off'); return; }
@@ -2358,7 +2375,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     e.age += dt;
     if (e.flash > 0) e.flash -= dt;
     if (e.leaving) { e.y -= 240 * dt; if (e.y < -110) { e.dead = true; } }
-    else if (e.y < e.ty) e.y = Math.min(e.ty, e.y + (e.summoned ? 170 : e.type === 'boss' ? 55 : 120) * (G.replay ? 3 : 1) * dt);
+    else if (e.y < e.ty) e.y = Math.min(e.ty, e.y + (G.replay && e.arrSpd ? e.arrSpd : (e.summoned ? 170 : e.type === 'boss' ? 55 : 120)) * dt);
     else e.arrived = true;
     e.x = e.ox + Math.sin(e.age * (e.type === 'boss' ? 0.5 : e.type === 'swarm' ? 1.5 : 0.9) + e.ph) * e.amp;
     if (e.parent) e.x = e.parent.x + e.slot;
@@ -2383,7 +2400,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       var phase = Math.floor(e.age / 4) % (e.final ? 6 : T >= 6 ? 4 : 3);
       /* unique attacks: first one 2 s after the boss has arrived, then exactly every 6 s (2 s, 8 s, 14 s ...) */
       var spFire = false;
-      if (!e.final) { if (e.spT == null) e.spT = e.summoned ? 0.3 : 2; e.spT -= dt; if (e.spT <= 0) { e.spT += 6; spFire = true; } }
+      if (!e.final) { if (e.spT == null) e.spT = e.summoned ? 0.3 : 2; e.spT -= dt; if (e.spT <= 0) { e.spT = G.replay ? 99 : e.spT + 6; spFire = true; } }
       if (!e.final && e.skin === 0) {
         /* mecha beetle: it rolls up a big clod of earth and hurls it at the plane */
         if (e.clodW > 0) {
@@ -2656,7 +2673,19 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     for (var q = 1; q < pts.length; q++) ctx.lineTo(pts[q][0], pts[q][1]);
     ctx.closePath();
   }
+  var DEAD = false;
+  /* beaten look: a squeezed "> <" eye (or X in the middle) */
+  function hurtEye(x, y, r, side) {
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.arc(x, y, r * 1.1, 0, TAU); ctx.fillStyle = '#fff4d6'; ctx.fill(); ctx.lineWidth = 1.2; ctx.stroke();
+    ctx.beginPath();
+    if (side === 0) { ctx.moveTo(x - r * 0.8, y - r * 0.8); ctx.lineTo(x + r * 0.8, y + r * 0.8); ctx.moveTo(x + r * 0.8, y - r * 0.8); ctx.lineTo(x - r * 0.8, y + r * 0.8); }
+    else { var d = side; ctx.moveTo(x - d * r * 0.9, y - r * 0.85); ctx.lineTo(x + d * r * 0.7, y); ctx.lineTo(x - d * r * 0.9, y + r * 0.85); }
+    ctx.strokeStyle = '#2a0f1f'; ctx.lineWidth = Math.max(1.8, r * 0.38); ctx.stroke();
+    ctx.restore();
+  }
   function eye(e, x, y, r) {
+    if (DEAD) { hurtEye(x, y, r, x < 0 ? 1 : x > 0 ? -1 : 0); return; }
     ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fillStyle = '#fff'; ctx.fill();
     ctx.lineWidth = 1.5; ctx.stroke();
     var a = Math.atan2(G.py - (e.y + y), G.px - (e.x + x));
@@ -2902,6 +2931,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     /* fierce eyes */
     var ea = Math.atan2(G.py - (e.y + 26), G.px - e.x);
     [-7, 7].forEach(function (x) {
+      if (DEAD) { hurtEye(x, 26, 4.6, x < 0 ? 1 : -1); return; }
       ctx.beginPath(); ctx.arc(x, 26, 4.6, 0, TAU); ctx.fillStyle = '#fff7b0'; ctx.fill(); ctx.lineWidth = 1.5; ctx.stroke();
       ctx.beginPath(); ctx.arc(x + Math.cos(ea) * 1.8, 26 + Math.sin(ea) * 1.8, 2.2, 0, TAU); ctx.fillStyle = '#111'; ctx.fill();
     });
@@ -2947,7 +2977,13 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     ctx.beginPath(); ctx.ellipse(0, 4, 26 * pulse, 17 * pulse, 0, 0, TAU);
     var eg = ctx.createRadialGradient(0, 4, 2, 0, 4, 26); eg.addColorStop(0, '#fff6ff'); eg.addColorStop(0.55, '#ff7ad1'); eg.addColorStop(1, '#a8115f');
     ctx.fillStyle = F ? '#fff' : eg; ctx.fill(); ctx.lineWidth = 2.6; ctx.strokeStyle = C.outline; ctx.stroke();
+    if (DEAD) {
+      ctx.beginPath(); ctx.ellipse(0, 4, 26, 17, 0, 0, TAU); ctx.fillStyle = '#7a2e5c'; ctx.fill(); ctx.lineWidth = 2.6; ctx.stroke();
+      ctx.save(); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-20, -2); ctx.lineTo(0, 9); ctx.lineTo(20, -2); ctx.moveTo(-20, 12); ctx.lineTo(0, 4); ctx.lineTo(20, 12);
+      ctx.strokeStyle = '#1b0630'; ctx.lineWidth = 5; ctx.stroke(); ctx.restore();
+    } else {
     ctx.beginPath(); ctx.ellipse(Math.cos(ea) * 7, 4 + Math.sin(ea) * 4, 5, 13, 0, 0, TAU); ctx.fillStyle = '#12001f'; ctx.fill();
+    }
     /* chest gems */
     [[-22, 30], [22, 30], [0, 44]].forEach(function (g, k) { ctx.beginPath(); ctx.arc(g[0], g[1], 3.4, 0, TAU); ctx.fillStyle = (Math.floor(t * 3) + k) % 2 ? '#7ef3ff' : '#ff5c8a'; ctx.fill(); });
     /* orbit ring (front half) + planets */
@@ -2960,10 +2996,23 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     ctx.restore();
   }
   function drawEnemy(e) {
+    DEAD = !!e.defeated;
+    drawEnemy0(e);
+    DEAD = false;
+    if (e.defeated) { /* dizzy stars circling over the head */
+      var top = e.y - e.r * (e.sc || 1) * (e.final ? 1.45 : 0.95) - 6;
+      for (var k = 0; k < 3; k++) {
+        var a = e.age * 2.4 + k * 2.09, sx = e.x + Math.cos(a) * 20 * (e.sc ? e.sc * 1.6 : 1), sy = top + Math.sin(a) * 5;
+        ctx.beginPath(); ctx.arc(sx, sy, 3.6, 0, TAU); ctx.fillStyle = '#ffe14d'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = C.outline; ctx.stroke();
+      }
+    }
+  }
+  function drawEnemy0(e) {
     if (e.tents && e.tents.length) drawTents(e);
     if (e.bm) drawAlienBeams(e);
     ctx.save(); ctx.translate(e.x, e.y);
     if (e.sc) ctx.scale(e.sc, e.sc);
+    if (e.tilt) ctx.rotate(e.tilt);
     if (e.type === 'swarm') { ctx.lineJoin = 'round'; ctx.strokeStyle = C.outline; drawSwarm(e); ctx.restore(); return; }
     if (e.final) { ctx.scale(1.6, 1.6); ctx.lineWidth = 2; }
     ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.strokeStyle = C.outline;
@@ -3369,7 +3418,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   }
   /* background / monster look by wave: 1-4 ground, 5-8 sea, 9-12 sky, 13+ space (final stage = space) */
   function zoneOf(w) { return w <= 4 ? 0 : w <= 8 ? 1 : w <= 12 ? 2 : 3; }
-  function bgTarget() { return G.finalMode ? 3 : zoneOf(G.wave); }
+  function bgTarget() { if (G.replay) return G.replay.zone || 0; return G.finalMode ? 3 : zoneOf(G.wave); }
   function vgrad(c1, c2) { var g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, c1); g.addColorStop(1, c2); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); }
   var PER = 1060;
   function py(o, k) { return ((o.y + BG.scr * k) % PER) - 80; }
@@ -3708,6 +3757,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     panelOpen = true; panelPrev = mode;
     if (mode === 'play') { mode = 'pause'; pauseCommon(); }
     $(panelEl).hidden = false;
+    if (panelEl === 'ovPanel') syncChecks();
     if (panelEl === 'ovVol') { syncVol(); pickVoiceRefresh(); }
     $(panelEl).querySelector('.pcard').scrollTop = 0;
   }
@@ -3736,11 +3786,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   function replayBoss(i) {
     if (i < 4) spawnEnemy('boss', { kind: i, bw: (i + 1) * 4 }); else spawnFinalBoss();
     var e = G.enemies[G.enemies.length - 1];
-    e.hp = e.maxHp = 1e7; e.def = 0; e.replayKind = i; e.fireT = 1.2;
+    e.hp = e.maxHp = 1e7; e.def = 0; e.replayKind = i; e.fireT = 1.2; e.spT = 0.5; e.arrSpd = (e.ty - e.y) / 1.5; G.replay.zone = i < 4 ? i : 3;
     G.replay.cur = e; G.replay.t = 0; G.replay.phase = 'fight';
   }
   function startReplay() {
-    G.replay = { i: 0, t: 0, phase: 'gap', wait: 1.2, cur: null };
+    G.replay = { i: 0, t: 0, phase: 'gap', wait: 0.5, cur: null, zone: 0 }; BG.p = 0;
     G.enemies = []; G.bullets = []; G.spawnQ = []; G.turrets = []; G.items = []; G.ending = true; G.finalPending = false; G.finalMode = true;
     G.tx = W / 2; G.ty = H - 90; G.hp = Math.max(1, G.hp);
   }
@@ -3749,17 +3799,17 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     G.ty = H - 90;
     if (r.phase === 'gap') { G.tx = W / 2; r.wait -= dt; if (r.wait <= 0) replayBoss(r.i); return; }
     var e = r.cur;
-    if (!e || e.dead) { r.phase = 'gap'; r.wait = 0.8; return; }
+    if (!e || e.dead) { r.phase = 'gap'; r.wait = 0.2; return; }
     G.tx = clamp(e.x, 50, W - 50);
     if (e.arrived) {
       r.t += dt;
-      e.hp = Math.max(e.maxHp * 0.03, e.maxHp * (1 - r.t / 6));
+      e.hp = Math.max(e.maxHp * 0.03, e.maxHp * (1 - r.t / 4.5));
     }
-    if (r.t >= 6 || e.age > 16) {
+    if (r.t >= 4.5 || e.age > 12) {
       e.dead = true; G.bullets.length = 0; G.flash = 0.25; G.shake = 0.4; sfx('boom');
       for (var z = 0; z < 5; z++) burst(e.x + rnd(-50, 50), e.y + rnd(-35, 35), 36, z % 2 ? C.sun : '#fff', 340);
       r.i++;
-      if (r.i >= 5) endTableau(); else { r.phase = 'gap'; r.wait = 1.2; }
+      if (r.i >= 5) endTableau(); else { r.phase = 'gap'; r.wait = 0.2; }
     }
   }
   function endTableau() {
@@ -3770,7 +3820,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     spots.forEach(function (sp, n) {
       if (sp[0] < 4) spawnEnemy('boss', { kind: sp[0], bw: 4 }); else spawnFinalBoss();
       var e = G.enemies[G.enemies.length - 1];
-      e.deco = true; e.arrived = true; e.x = sp[1]; e.y = sp[2]; e.sc = sp[3]; e.hp = e.maxHp; e.ph = n; e.baseY = sp[2];
+      e.deco = true; e.defeated = true; e.tilt = (n % 2 ? 1 : -1) * (n === 2 ? 0.12 : 0.3); e.arrived = true; e.x = sp[1]; e.y = sp[2]; e.sc = sp[3]; e.hp = e.maxHp; e.ph = n; e.baseY = sp[2];
     });
     G.tx = W / 2; G.ty = H - 90;
   }
@@ -3778,7 +3828,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     G.tx = W / 2; G.ty = H - 90;
     G.px += (G.tx - G.px) * Math.min(1, dt * 4); G.py += (G.ty - G.py) * Math.min(1, dt * 4);
     G.pb.length = 0; G.bullets.length = 0;
-    G.enemies.forEach(function (e) { e.age += dt; e.y = e.baseY + Math.sin(e.age * 1.6 + e.ph) * 4; });
+    G.enemies.forEach(function (e) { e.age += dt; e.y = e.baseY + 6 + Math.sin(e.age * 1.2 + e.ph) * 2.5; });
     updateFx(dt);
   }
   function finish(cleared) {
@@ -3943,7 +3993,16 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   });
   $('btnVoiceTest').addEventListener('click', function () { this.blur(); cancelSpeech(); speak('Look at the sky. I can fly high.'); });
   $('btnTipOk').addEventListener('click', function () { this.blur(); closeTip(); });
-  $('btnTipReset').addEventListener('click', function () { tipSeen = {}; try { localStorage.removeItem('sunnySkyV3Tips'); } catch (e) {} this.textContent = '다시 보여줄게요 ✓'; });
+  function syncChecks() { $('chkTips').checked = !(tipSeen.turret && tipSeen.star); $('chkSkip').checked = skipSpeak; }
+  $('chkTips').addEventListener('change', function () {
+    tipSeen = this.checked ? {} : { turret: 1, star: 1 };
+    try { localStorage.setItem('sunnySkyV3Tips', JSON.stringify(tipSeen)); } catch (e) {}
+  });
+  $('chkSkip').addEventListener('change', function () {
+    skipSpeak = this.checked;
+    try { localStorage.setItem('sunnySkyV3Skip', skipSpeak ? '1' : '0'); } catch (e) {}
+  });
+  syncChecks();
   $('btnGear').addEventListener('click', function () { this.blur(); openPanel(); });
   $('btnPanelClose').addEventListener('click', function () { closePanel(); });
   $('btnPanelClose2').addEventListener('click', function () { closePanel(); });
