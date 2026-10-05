@@ -143,6 +143,10 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
 }
 .chk { display: flex; align-items: flex-start; gap: 10px; padding: 8px 4px; font-weight: 700; cursor: pointer; }
 .chk input { width: 24px; height: 24px; flex: none; margin-top: 1px; accent-color: var(--accent-ink, #1f6feb); }
+.pwrow { display: flex; align-items: center; gap: 10px; padding: 0 4px 6px 38px; }
+.pwrow input { width: 8.5em; font: inherit; padding: 0.35em 0.6em; border: 2px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--fg); }
+.pwrow input:disabled { opacity: 0.5; }
+#skipMsg { font-weight: 700; color: var(--coral); font-size: 0.9rem; }
 .chk small { display: block; font-weight: 400; color: var(--soft); font-size: 0.8rem; margin-top: 2px; }
 .ov.ending { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .ov.ending { padding-top: 0; padding-bottom: 0; flex-direction: column; overflow: hidden; }
@@ -426,7 +430,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.27 · built 2026-10-05 15:58 (EST)</p>
+        <p class="ver" id="ver">v3.29 · built 2026-10-05 16:50 (EST)</p>
       </div>
     </div>
 
@@ -515,7 +519,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.27 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.29 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -553,6 +557,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       </section>
       <label class="chk"><input type="checkbox" id="chkTips"><span>💬 처음 설명을 다시 보여줄게요</span></label>
       <label class="chk"><input type="checkbox" id="chkSkip"><span>🤫 말하지 않고 넘어갈게요 <small>(문장을 읽어주지도, 마이크로 듣지도 않고 "확인했어요" 버튼으로 통과해요)</small></span></label>
+      <div class="pwrow"><input type="password" id="skipPw" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="12" placeholder="비밀번호" aria-label="비밀번호"><span id="skipMsg" role="status"></span></div>
       <button class="go pclose-wide" id="btnPanelClose2">닫고 계속하기</button>
     </div>
   </div>
@@ -2129,7 +2134,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     speak(o.en, listenSoon);
   }
   var skipSpeak = false;
-  try { skipSpeak = localStorage.getItem('sunnySkyV3Skip') === '1'; } catch (e) {}
+  var SKIP_PW = '1004', skipFails = 0, skipLocked = false; /* the on/off state is not saved: after a page reload it is off and the lock is cleared */
   /* "skip speaking": no voice, no mic -> just a confirm button at the lower right */
   function goSkip() {
     stopListening(); cancelSpeech();
@@ -4454,10 +4459,20 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     tipSeen = this.checked ? {} : { turret: 1, star: 1 };
     try { localStorage.setItem('sunnySkyV3Tips', JSON.stringify(tipSeen)); } catch (e) {}
   });
+  function skipUi() {
+    $('chkSkip').disabled = skipLocked; $('skipPw').disabled = skipLocked;
+    if (skipLocked) $('skipMsg').textContent = '비밀번호 3회 오류';
+  }
   $('chkSkip').addEventListener('change', function () {
-    skipSpeak = this.checked;
-    try { localStorage.setItem('sunnySkyV3Skip', skipSpeak ? '1' : '0'); } catch (e) {}
+    if (skipLocked) { this.checked = skipSpeak; return; }
+    if (!this.checked) { skipSpeak = false; $('skipMsg').textContent = ''; return; }
+    if ($('skipPw').value === SKIP_PW) { skipSpeak = true; $('skipPw').value = ''; $('skipMsg').textContent = ''; return; }
+    this.checked = false; skipSpeak = false; skipFails++;
+    $('skipPw').value = '';
+    if (skipFails >= 3) { skipLocked = true; skipUi(); }
+    else $('skipMsg').textContent = '틀렸습니다';
   });
+  $('skipPw').addEventListener('input', function () { if (!skipLocked) $('skipMsg').textContent = ''; });
   syncChecks();
   (function () {
     var card = $('ovOver').querySelector('.card'), rv = card.querySelector('.review'), tm = null;
