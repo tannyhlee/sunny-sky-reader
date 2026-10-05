@@ -407,7 +407,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.16 · built 2026-10-04 20:26 (EST)</p>
+        <p class="ver" id="ver">v3.17 · built 2026-10-04 20:54 (EST)</p>
       </div>
     </div>
 
@@ -496,7 +496,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.16 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.17 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -1387,7 +1387,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       score: 0, wave: 0, hp: 3, maxHp: 5, lv: { 1: 0, 2: 0, 3: 0, 4: 0, 8: 0 }, slots: [], bombs: [], fires: [], t8: 0, bombFlip: 0,
       inv: 0, px: W / 2, py: H - 110, tx: W / 2, ty: H - 110,
       bullets: [], pb: [], enemies: [], parts: [], pops: [], ships: [], orbPos: [], orbs: [], orbLv: 0, orbNext: 0, orbK: 0, freezeUsed: false, drones: [],
-      spawnQ: [], waveT: 0, waveClear: true, nextWave: 2.2, roundT: 0,
+      bossSeen: [0, 0, 0, 0], finalQueue: [], spawnQ: [], waveT: 0, waveClear: true, nextWave: 2.2, roundT: 0,
       baseT: 0, t2: 0, laserTick: 0, orbTick: 0, time: 0, shake: 0, flash: 0, bosses: 0, read: [], evo: 0, killScore: 0, goalPrev: 0, goal: GOAL_FIRST, closeT: 0, roundAt: 0, rate: 0, ksPrev: 0, bonus: false, items: [], turrets: [], finalMode: false, ending: false, endT: 0, clock: 0, cleared: false
     };
     R = { opts: [], sel: -1, stage: 'none', sayLeft: 0, sayWait: 0 };
@@ -2189,9 +2189,15 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
              tank: { hp: 14, r: 24, score: 400 }, swarm: { hp: 1.5, r: 11, score: 40 }, boss: { hp: 160, r: 46, score: 3000 } };
   /* the final stage starts once every enemy already on screen is defeated; nothing is cleared automatically */
   function startFinal() {
-    G.finalMode = true; G.finalPending = true; G.finalWait = 0; G.spawnQ = []; G.waveClear = false; G.nextWave = 1e9;
-    announce('FINAL STAGE', '남은 적을 모두 물리치면 마지막 보스가 나타나요!');
+    G.finalMode = true; G.finalPending = true; G.finalWait = 0; G.spawnQ = [];
+    G.finalQueue = [0, 1, 2, 3].filter(function (k) { return !G.bossSeen[k]; }); G.waveClear = false; G.nextWave = 1e9;
+    announce('FINAL STAGE', G.finalQueue.length ? '남은 적을 물리치면 아직 못 만난 보스가 먼저 나타나요!' : '남은 적을 모두 물리치면 마지막 보스가 나타나요!');
     updateHUD();
+  }
+  function launchQueuedBoss() {
+    var k = G.finalQueue.shift();
+    G.spawnQ = bossQueue(k, 99, (k + 1) * 4); G.waveT = 0; G.finalWait = 0;
+    announce('BOSS', BOSS_NAMES[k] + '이(가) 나타났어요!');
   }
   function spawnFinalBoss() {
     G.finalPending = false; G.roundAt = G.time;
@@ -2201,12 +2207,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     announce('FINAL BOSS', '마지막 보스가 나타났어요!');
     G.flash = 0.4; G.shake = 0.5; sfx('mother'); updateHUD();
   }
-  var BOSS_NAMES = [
-    ['철갑 풍뎅이', '왕 말벌', '거대 사마귀'],
-    ['심해 문어왕', '가시 해파리', '전기 가오리'],
-    ['먹구름 박쥐', '폭풍 대장', '번개 독수리'],
-    ['외계 사령관', '별빛 파괴자', '은하 폭군']
-  ];
+  /* one fixed boss per zone: wave 4 / 8 / 12 / 16 (then the cycle repeats) */
+  var BOSS_NAMES = ['메카 딱정벌레', '심해 문어왕', '번개 독수리', '외계 사령관'];
   var PHASE_NAMES = ['회전 탄막', '5연발 조준', '소용돌이 연사', '쌍포 난사', '쌍방향 소용돌이', '전방위 폭풍'];
   function spawnEnemy(type, it) {
     if (type === 'star') { G.items.push({ x: 50 + Math.random() * (W - 100), y: -30, ph: Math.random() * 6, age: 0 }); return; }
@@ -2220,7 +2222,10 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     G.enemies.push({ type: type, skin: BG.kind, def: defOf(type), x: ox, y: -50, ox: ox, amp: amp, hp: hp, maxHp: hp, r: d.r,
       ty: type === 'boss' ? 135 : 60 + Math.random() * 140, age: 0, fireT: 0.8 + Math.random() * 1.2,
       ph: Math.random() * 6, ang: Math.random() * 6, flash: 0, dead: false, arrived: false });
-    if (type === 'boss') { var be = G.enemies[G.enemies.length - 1]; be.bwave = G.wave; be.bname = BOSS_NAMES[BG.kind][G.bosses % 3]; }
+    if (type === 'boss') {
+      var be = G.enemies[G.enemies.length - 1], bk = it && it.kind != null ? it.kind : 0;
+      be.skin = bk; be.bwave = (it && it.bw) || G.wave; be.bname = BOSS_NAMES[bk]; G.bossSeen[bk] = 1;
+    }
   }
   var EARLY_WAVES = 8; /* waves 1-8 = up to and including the 2nd boss wave */
   var TIPS = {
@@ -2249,15 +2254,21 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     tone(700, 0.12, 'triangle', 0.05);
   }
   function closeTip() { if (!tipOpen) return; tipOpen = false; tipObj = null; $('tip').hidden = true; }
+  /* a boss plus its escorts */
+  function bossQueue(kind, w, bw) {
+    var q = [{ t: 0.5, type: 'boss', kind: kind, bw: bw }], T = diffT();
+    var esc = Math.min(6, Math.floor(T / 2)) + (w <= EARLY_WAVES ? 6 : 3);
+    for (var e2 = 0; e2 < esc; e2++) { q.push({ t: 2.5 + e2 * 1.0, type: e2 % 3 === 2 ? 'drone' : 'wing' }); q.push({ t: 3 + e2 * 1.0, type: 'swarm' }); }
+    return q;
+  }
   function startWave() {
     G.wave++; G.waveT = 0; G.waveClear = false;
     var w = G.wave, q = [], T = diffT();
     var D = DIFFS[dl];
     if (w % 4 === 0) {
-      q.push({ t: 0.5, type: 'boss' });
-      var esc = Math.min(6, Math.floor(T / 2)) + (w <= EARLY_WAVES ? 6 : 3);
-      for (var e2 = 0; e2 < esc; e2++) { q.push({ t: 2.5 + e2 * 1.0, type: e2 % 3 === 2 ? 'drone' : 'wing' }); q.push({ t: 3 + e2 * 1.0, type: 'swarm' }); }
-      announce('BOSS WAVE', '보스가 나타났어요!');
+      var bkind = (w / 4 - 1) % 4;
+      q = bossQueue(bkind, w, w);
+      announce('BOSS WAVE', BOSS_NAMES[bkind] + '이(가) 나타났어요!');
     } else {
       var early = w <= EARLY_WAVES;
       var n = Math.min(D.maxN * (early ? 2 : 1), Math.round((2.5 + w * 0.7 + T * 1.0) * D.cnt * (early ? 2 : 1))), gap = Math.max(0.3, 0.75 - T * 0.035) * (early ? 0.7 : 1);
@@ -2347,6 +2358,43 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       if (e.fireT <= 0) { e.fireT = (3.0 + Math.random() * 0.6) * slow; a = aim(e); for (k = -1; k <= 1; k++) eb(e.x, e.y + 14, a + k * 0.16, 150 * sp, 7); }
     } else if (e.type === 'boss') {
       var phase = Math.floor(e.age / 4) % (e.final ? 6 : T >= 6 ? 4 : 3);
+      if (!e.final && e.skin === 0) {
+        /* mecha beetle: every 7 s it rolls up a big clod of earth and hurls it at the plane */
+        e.spT = (e.spT == null ? 4 : e.spT) - dt;
+        if (e.clodW > 0) {
+          e.clodW -= dt;
+          if (e.clodW <= 0) {
+            var ca = Math.atan2(G.py - (e.y + 70), G.px - e.x);
+            G.bullets.push({ x: e.x, y: e.y + 70, vx: Math.cos(ca) * 380, vy: Math.sin(ca) * 380, r: 50, clod: true, rot: 0 });
+            G.shake = Math.max(G.shake, 0.15); sfx('boom');
+          }
+        } else if (e.spT <= 0) { e.spT = 7; e.clodW = 0.8; }
+      }
+      if (!e.final && e.skin === 1) {
+        /* deep-sea octopus king: every 7 s two tentacles shoot straight at where the plane is */
+        e.spT = (e.spT == null ? 4 : e.spT) - dt;
+        if (!e.tents) e.tents = [];
+        if (e.spT <= 0 && !e.tents.length) {
+          e.spT = 7;
+          /* the two tentacles aim at the spot where the plane is right now (side by side, ~22 px apart) and stay rooted in the boss */
+          [-11, 11].forEach(function (d) { e.tents.push({ tx: G.px + d, ty: G.py, ang: 0, ph: 0, tm: 0, len: 0, max: 0 }); });
+        }
+        e.tents.forEach(function (tn) {
+          tn.ang = Math.atan2(tn.ty - (e.y + 10), tn.tx - e.x); tn.max = Math.hypot(tn.ty - (e.y + 10), tn.tx - e.x) + 260;
+          tn.tm += dt;
+          if (tn.ph === 0 && tn.tm >= 0.7) { tn.ph = 1; tn.tm = 0; }
+          else if (tn.ph === 1) { tn.len = Math.min(tn.max, tn.len + 450 * dt); if (tn.len >= tn.max) { tn.ph = 2; tn.tm = 0; } }
+          else if (tn.ph === 2 && tn.tm >= 0.3) { tn.ph = 3; tn.tm = 0; }
+          else if (tn.ph === 3) { tn.len -= 900 * dt; if (tn.len <= 0) tn.dead = true; }
+          if (tn.len > 0) {
+            var ox2 = e.x, oy2 = e.y + 10, ex2 = Math.cos(tn.ang), ey2 = Math.sin(tn.ang);
+            var rx2 = G.px - ox2, ry2 = G.py - oy2, pr2 = clamp(rx2 * ex2 + ry2 * ey2, 0, tn.len);
+            var dx2 = rx2 - ex2 * pr2, dy2 = ry2 - ey2 * pr2;
+            if (dx2 * dx2 + dy2 * dy2 < 17 * 17 && G.inv <= 0) hit();
+          }
+        });
+        e.tents = e.tents.filter(function (tn) { return !tn.dead; });
+      }
       if (e.final) { e.escT -= dt; if (e.escT <= 0 && G.enemies.length < 6) { e.escT = 13; spawnEnemy('wing'); spawnEnemy('wing'); } }
       e.fireT -= dt;
       if (e.fireT <= 0) {
@@ -2439,7 +2487,10 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (G.waveClear && G.wave === 0 && R.stage === 'none') { /* wait for the first round to be created */ }
     if (G.waveClear && !G.finalMode) { G.nextWave -= dt; if (G.nextWave <= 0) startWave(); }
     G.enemies.forEach(function (e) { if (!e.dead) enemyAI(e, dt); });
-    if (G.finalPending) { G.finalWait += dt; if (G.finalWait > 60 || !G.enemies.some(function (e) { return !e.dead; })) spawnFinalBoss(); }
+    if (G.finalPending) {
+      G.finalWait += dt;
+      if (G.finalWait > 90 || !(G.spawnQ.length || G.enemies.some(function (e) { return !e.dead; }))) { if (G.finalQueue.length) launchQueuedBoss(); else spawnFinalBoss(); }
+    }
     maybeTip();
     /* ground turrets drift down with the ground and leave the screen; touching one costs a heart */
     G.turrets.forEach(function (t) {
@@ -2705,13 +2756,126 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(-4, -5, 3, 0, TAU); ctx.fill();
     ctx.restore();
   }
+  function drawTents(e) {
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    var ox = e.x, oy = e.y + 10, tt = G.time;
+    e.tents.forEach(function (tn) {
+      var ex = Math.cos(tn.ang), ey = Math.sin(tn.ang), nx = -ey, ny = ex;
+      if (tn.ph === 0) {
+        ctx.globalAlpha = 0.25 + 0.2 * Math.sin(tt * 30); ctx.strokeStyle = '#ff5c8a'; ctx.lineWidth = 30;
+        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + ex * tn.max, oy + ey * tn.max); ctx.stroke();
+        ctx.globalAlpha = 0.7; ctx.lineWidth = 2.5; ctx.setLineDash([10, 8]); ctx.strokeStyle = '#fff';
+        ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox + ex * tn.max, oy + ey * tn.max); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+        return;
+      }
+      if (tn.len <= 0) return;
+      var n = Math.max(2, Math.ceil(tn.len / 16));
+      function path() { ctx.beginPath(); for (var i = 0; i <= n; i++) { var d = tn.len * i / n, w = Math.sin(d * 0.045 - tt * 12) * 7 * (i / n); if (i) ctx.lineTo(ox + ex * d + nx * w, oy + ey * d + ny * w); else ctx.moveTo(ox, oy); } }
+      path(); ctx.strokeStyle = C.outline; ctx.lineWidth = 31; ctx.stroke();
+      path(); ctx.strokeStyle = '#8e6bd0'; ctx.lineWidth = 25; ctx.stroke();
+      path(); ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 7; ctx.stroke();
+      for (var i = 1; i < n; i += 2) { var d = tn.len * i / n, w = Math.sin(d * 0.045 - tt * 12) * 7 * (i / n); ctx.beginPath(); ctx.arc(ox + ex * d + nx * (w + 6), oy + ey * d + ny * (w + 6), 3.2, 0, TAU); ctx.fillStyle = '#ffd1e8'; ctx.fill(); }
+    });
+    ctx.restore();
+  }
+  function drawEagle(e) {
+    var F = e.flash > 0, t = e.age, K = function (c) { return F ? '#fff' : c; }, fw = Math.sin(t * 4) * 9;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    /* electric aura */
+    var ag = ctx.createRadialGradient(0, 0, 10, 0, 0, 90); ag.addColorStop(0, 'rgba(255,225,77,0.28)'); ag.addColorStop(1, 'rgba(255,225,77,0)');
+    ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(0, 0, 90, 0, TAU); ctx.fill();
+    /* tail feathers (top) */
+    poly([[-8, -22], [-22, -54], [-5, -46]]); fl(K('#33406b')); poly([[8, -22], [22, -54], [5, -46]]); fl(K('#33406b')); poly([[-5, -22], [0, -62], [5, -22]]); fl(K('#46558c'));
+    /* wings */
+    [1, -1].forEach(function (sd) {
+      ctx.save(); ctx.scale(sd, 1);
+      poly([[10, -8], [34, -30 + fw], [62, -40 + fw * 1.3], [90, -24 + fw * 1.7], [78, -8 + fw * 1.2], [88, 8 + fw], [66, 8 + fw * 0.6], [72, 24], [48, 14], [50, 30], [28, 16], [10, 16]]);
+      fl(K('#34416e'));
+      poly([[10, -6], [34, -22 + fw * 0.6], [62, -28 + fw], [58, -8 + fw * 0.6], [34, 2], [10, 8]]); fl(K('#5666a3'));
+      ctx.strokeStyle = K('#ffe14d'); ctx.lineWidth = 2;
+      [[78, -8 + fw * 1.2, 88, 8 + fw], [66, 8 + fw * 0.6, 72, 24], [48, 14, 50, 30]].forEach(function (f) { ctx.beginPath(); ctx.moveTo(f[0], f[1]); ctx.lineTo(f[2], f[3]); ctx.stroke(); });
+      ctx.strokeStyle = C.outline; ctx.lineWidth = 2.5;
+      poly([[40, -22], [54, -22], [47, -10], [60, -10], [38, 14], [44, -2], [34, -2]]); fl(K('#ffe14d'));
+      ctx.restore();
+    });
+    /* body, chest bolt */
+    ell(0, 2, 18, 30); fl(K('#2f3a62'));
+    poly([[-3, -12], [8, -12], [2, 0], [10, 0], [-6, 22], [-1, 6], [-9, 6]]); fl(K('#ffe14d'));
+    /* head + crest */
+    poly([[-12, 14], [-9, 4], [-3, 12]]); fl(K('#ffe14d')); poly([[12, 14], [9, 4], [3, 12]]); fl(K('#ffe14d'));
+    ctx.beginPath(); ctx.arc(0, 28, 15, 0, TAU); fl(K('#f4f1e8'));
+    /* hooked beak */
+    poly([[-8, 33], [8, 33], [7, 45], [1, 55], [-1, 46]]); fl(K('#ffc400'));
+    /* fierce eyes */
+    var ea = Math.atan2(G.py - (e.y + 26), G.px - e.x);
+    [-7, 7].forEach(function (x) {
+      ctx.beginPath(); ctx.arc(x, 26, 4.6, 0, TAU); ctx.fillStyle = '#fff7b0'; ctx.fill(); ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + Math.cos(ea) * 1.8, 26 + Math.sin(ea) * 1.8, 2.2, 0, TAU); ctx.fillStyle = '#111'; ctx.fill();
+    });
+    ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-14, 17); ctx.lineTo(-3, 22); ctx.moveTo(14, 17); ctx.lineTo(3, 22); ctx.stroke();
+    /* crackling sparks at the wing tips */
+    var sd2 = Math.floor(t * 14);
+    [-1, 1].forEach(function (sd, k) {
+      var tx = sd * 90, ty = -24 + fw * 1.7;
+      ctx.beginPath(); ctx.moveTo(tx, ty);
+      for (var j = 1; j <= 4; j++) { var r1 = Math.sin((sd2 + k * 7 + j * 3) * 12.9898) * 43758.5453; r1 -= Math.floor(r1); ctx.lineTo(tx + sd * j * 6 + (r1 - 0.5) * 16, ty + (r1 - 0.5) * 24 - j * 3); }
+      ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 3; ctx.stroke(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2; ctx.stroke();
+    });
+  }
+  function drawTyrant(e) {
+    var F = e.flash > 0, t = e.age, K = function (c) { return F ? '#fff' : c; };
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 2.2; ctx.strokeStyle = C.outline;
+    /* cosmic aura */
+    var ag = ctx.createRadialGradient(0, 0, 20, 0, 0, 100); ag.addColorStop(0, 'rgba(190,90,255,0.35)'); ag.addColorStop(1, 'rgba(190,90,255,0)');
+    ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(0, 0, 100, 0, TAU); ctx.fill();
+    /* orbit ring (back half), planets */
+    var ra = Math.sin(t * 0.7) * 0.12 - 0.1;
+    ctx.save(); ctx.rotate(ra);
+    ctx.beginPath(); ctx.ellipse(0, 4, 82, 20, 0, Math.PI, TAU); ctx.strokeStyle = '#f2c14e'; ctx.lineWidth = 4; ctx.stroke(); ctx.strokeStyle = C.outline; ctx.lineWidth = 1; ctx.stroke();
+    ctx.restore();
+    /* pauldron spikes */
+    [1, -1].forEach(function (sd) {
+      ctx.save(); ctx.scale(sd, 1); ctx.lineWidth = 2.2; ctx.strokeStyle = C.outline;
+      poly([[30, -14], [64, -40], [58, -12], [78, -2], [56, 10], [64, 30], [34, 18]]); fl(K('#3a1f5c'));
+      ctx.beginPath(); ctx.moveTo(34, -10); ctx.lineTo(60, -34); ctx.moveTo(36, 12); ctx.lineTo(60, 26); ctx.strokeStyle = '#f2c14e'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.restore();
+    });
+    /* armour */
+    poly([[0, -34], [34, -20], [40, 14], [22, 40], [0, 50], [-22, 40], [-40, 14], [-34, -20]]);
+    var bg = ctx.createLinearGradient(0, -34, 0, 50); bg.addColorStop(0, '#6a3d9c'); bg.addColorStop(1, '#241240');
+    ctx.fillStyle = F ? '#fff' : bg; ctx.fill(); ctx.lineWidth = 2.6; ctx.strokeStyle = C.outline; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(-26, 30); ctx.lineTo(0, 40); ctx.lineTo(26, 30); ctx.moveTo(-30, -14); ctx.lineTo(-34, 12); ctx.moveTo(30, -14); ctx.lineTo(34, 12);
+    ctx.strokeStyle = K('#f2c14e'); ctx.lineWidth = 2.2; ctx.stroke();
+    /* crown */
+    poly([[-30, -24], [-27, -54], [-15, -36], [-8, -64], [0, -40], [8, -64], [15, -36], [27, -54], [30, -24]]); ctx.lineWidth = 2.4; ctx.strokeStyle = C.outline; fl(K('#f2c14e'));
+    [[-27, -54], [27, -54], [-8, -64], [8, -64]].forEach(function (g) { ctx.beginPath(); ctx.arc(g[0], g[1], 3, 0, TAU); ctx.fillStyle = '#ff3d9a'; ctx.fill(); });
+    /* giant eye */
+    var ea = Math.atan2(G.py - e.y, G.px - e.x), pulse = 1 + Math.sin(t * 5) * 0.06;
+    ctx.beginPath(); ctx.ellipse(0, 4, 26 * pulse, 17 * pulse, 0, 0, TAU);
+    var eg = ctx.createRadialGradient(0, 4, 2, 0, 4, 26); eg.addColorStop(0, '#fff6ff'); eg.addColorStop(0.55, '#ff7ad1'); eg.addColorStop(1, '#a8115f');
+    ctx.fillStyle = F ? '#fff' : eg; ctx.fill(); ctx.lineWidth = 2.6; ctx.strokeStyle = C.outline; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(Math.cos(ea) * 7, 4 + Math.sin(ea) * 4, 5, 13, 0, 0, TAU); ctx.fillStyle = '#12001f'; ctx.fill();
+    /* chest gems */
+    [[-22, 30], [22, 30], [0, 44]].forEach(function (g, k) { ctx.beginPath(); ctx.arc(g[0], g[1], 3.4, 0, TAU); ctx.fillStyle = (Math.floor(t * 3) + k) % 2 ? '#7ef3ff' : '#ff5c8a'; ctx.fill(); });
+    /* orbit ring (front half) + planets */
+    ctx.save(); ctx.rotate(ra);
+    ctx.beginPath(); ctx.ellipse(0, 4, 82, 20, 0, 0, Math.PI); ctx.strokeStyle = '#f2c14e'; ctx.lineWidth = 4; ctx.stroke(); ctx.strokeStyle = C.outline; ctx.lineWidth = 1; ctx.stroke();
+    [0, 2.1, 4.2].forEach(function (o, k) {
+      var pa = t * 0.9 + o, px = Math.cos(pa) * 82, py2 = 4 + Math.sin(pa) * 20;
+      ctx.beginPath(); ctx.arc(px, py2, 6 + (Math.sin(pa) > 0 ? 2 : 0), 0, TAU); ctx.fillStyle = ['#7ef3ff', '#ffb347', '#ff7ad1'][k]; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = C.outline; ctx.stroke();
+    });
+    ctx.restore();
+  }
   function drawEnemy(e) {
+    if (e.tents && e.tents.length) drawTents(e);
     ctx.save(); ctx.translate(e.x, e.y);
     if (e.type === 'swarm') { ctx.lineJoin = 'round'; ctx.strokeStyle = C.outline; drawSwarm(e); ctx.restore(); return; }
     if (e.final) { ctx.scale(1.6, 1.6); ctx.lineWidth = 2; }
     ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.strokeStyle = C.outline;
     var body = e.flash > 0 ? '#fff' : (e.final ? '#7a2e5c' : C.enemy);
-    if (e.skin !== 2) skinDraw(e);
+    if (e.final) drawTyrant(e);
+    else if (e.type === 'boss' && e.skin === 2) drawEagle(e);
+    else if (e.skin !== 2) skinDraw(e);
     else if (e.type === 'drone') {
       poly([[0, 18], [-17, -8], [-9, -15], [0, -9], [9, -15], [17, -8]]);
       ctx.fillStyle = body; ctx.fill(); ctx.stroke();
@@ -2743,6 +2907,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       poly([[-6, 34], [8, 34], [0, 46], [10, 46], [-8, 64], [-2, 48], [-10, 48]]);
       ctx.fillStyle = C.sun; ctx.fill(); ctx.stroke();
       eye(e, -16, -4, 9); eye(e, 16, -4, 9);
+    }
+    if (e.clodW > 0) { /* beetle rolling up a clod */
+      var cr = 50 * (1 - e.clodW / 0.8) + 6;
+      ctx.beginPath(); ctx.arc(0, 70, cr, 0, TAU); ctx.fillStyle = '#7b5232'; ctx.fill(); ctx.lineWidth = 3; ctx.stroke();
+      ctx.beginPath(); ctx.arc(-cr * 0.3, 70 - cr * 0.3, cr * 0.3, 0, TAU); ctx.fillStyle = '#5e3c22'; ctx.fill();
     }
     ctx.restore();
     if (e.type !== 'boss' && e.hp < e.maxHp) {
@@ -3219,6 +3388,15 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
 
     ctx.lineWidth = 2; ctx.strokeStyle = C.outline;
     G.bullets.forEach(function (b) {
+      if (b.clod) {
+        b.rot += 0.04;
+        ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(b.rot);
+        ctx.beginPath(); ctx.arc(0, 0, b.r, 0, TAU); ctx.fillStyle = '#7b5232'; ctx.fill(); ctx.lineWidth = 3; ctx.stroke();
+        [[-18, -14, 15], [16, -20, 11], [20, 12, 14], [-10, 20, 12], [2, -2, 9]].forEach(function (c) { ctx.beginPath(); ctx.arc(c[0], c[1], c[2], 0, TAU); ctx.fillStyle = '#5e3c22'; ctx.fill(); });
+        [[-22, 4, 5], [10, 28, 4], [28, -6, 4], [-4, -30, 5]].forEach(function (c) { ctx.beginPath(); ctx.arc(c[0], c[1], c[2], 0, TAU); ctx.fillStyle = '#a07a52'; ctx.fill(); });
+        ctx.restore(); ctx.lineWidth = 2; ctx.strokeStyle = C.outline;
+        return;
+      }
       ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 0.5, 0, TAU); ctx.fillStyle = C.coral; ctx.fill(); ctx.stroke();
       ctx.beginPath(); ctx.arc(b.x - 1.5, b.y - 1.5, 1.8, 0, TAU); ctx.fillStyle = '#fff'; ctx.fill();
     });
@@ -3291,7 +3469,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       ctx.save(); ctx.translate(0, 22);
       ctx.fillStyle = C.outline; ctx.fillRect(38, 14, W - 76, boss.final ? 16 : 12);
       ctx.fillStyle = boss.final ? '#ff3d6e' : C.coral; ctx.fillRect(41, 17, (W - 82) * Math.max(0, boss.hp / boss.maxHp), boss.final ? 10 : 6);
-      var bl1 = boss.final ? '최종 보스 · 먹구름 황제' : '웨이브 ' + boss.bwave + ' 보스 · ' + boss.bname;
+      var bl1 = boss.final ? '최종 보스 · 은하 폭군' : '웨이브 ' + boss.bwave + ' 보스 · ' + boss.bname;
       var bph = Math.floor(boss.age / 4) % (boss.final ? 6 : diffT() >= 6 ? 4 : 3);
       var bl2 = 'HP ' + Math.max(0, Math.ceil(boss.hp / boss.maxHp * 100)) + '%' + (boss.arrived ? ' · 패턴: ' + PHASE_NAMES[bph] : ' · 등장 중');
       ctx.save(); ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.strokeStyle = C.outline; ctx.fillStyle = '#fff';
