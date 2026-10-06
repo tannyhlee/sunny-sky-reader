@@ -256,20 +256,12 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
 }
 
 /* ===== V3 phone layout ===== */
-.tip { position: absolute; inset: 0; z-index: 9; background: rgba(8, 14, 30, 0.35); touch-action: manipulation; }
-.tipbub { position: absolute; background: var(--panel); color: var(--fg); border: 2.5px solid var(--ui-edge); border-radius: 16px; padding: 12px 14px; display: grid; gap: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
-.tipbub::after { content: ''; position: absolute; left: calc(var(--tail, 50%) - 10px); width: 18px; height: 18px; background: var(--panel); border: 2.5px solid var(--ui-edge); transform: rotate(45deg); }
-.tipbub.below::after { top: -11px; border-right: 0; border-bottom: 0; }
-.tipbub.above::after { bottom: -11px; border-left: 0; border-top: 0; }
 .fbub { position: absolute; z-index: 6; width: 190px; pointer-events: none; background: var(--panel); color: var(--fg); border: 2.5px solid var(--ui-edge); border-radius: 14px; padding: 7px 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.35); }
 .fbub::after { content: ''; position: absolute; left: calc(var(--tail, 50%) - 8px); width: 14px; height: 14px; background: var(--panel); border: 2.5px solid var(--ui-edge); transform: rotate(45deg); }
 .fbub.below::after { top: -9px; border-right: 0; border-bottom: 0; }
 .fbub.above::after { bottom: -9px; border-left: 0; border-top: 0; }
 .fbub b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 1rem; }
 .fbub p { margin: 2px 0 0; font-size: 0.82rem; line-height: 1.3; }
-.tipbub b { font-family: var(--font-display); font-weight: 400; font-size: 1.15rem; }
-.tipbub p { margin: 0; font-size: 0.95rem; }
-.tipbub .go { font-size: 1rem; padding: 0.5em 0.9em; }
 #oTime { font-size: 1.05rem; line-height: 1.6; }
 .hudline { position: absolute; left: 0; right: 0; top: 3px; z-index: 3; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 8px; pointer-events: none; font-family: var(--font-type); font-weight: 700; font-size: 0.86rem; color: #fff; font-variant-numeric: tabular-nums;
   text-shadow: -1.5px -1.5px 0 var(--outline), 1.5px -1.5px 0 var(--outline), -1.5px 1.5px 0 var(--outline), 1.5px 1.5px 0 var(--outline), 0 2px 0 var(--outline); }
@@ -418,13 +410,6 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     <div class="fbub" id="fb_star" hidden><b></b><p></p></div>
     <div class="fbub" id="fb_heart" hidden><b></b><p></p></div>
 
-    <div class="tip" id="tip" hidden>
-      <div class="tipbub" id="tipBub" role="dialog" aria-live="polite">
-        <b id="tipTitle"></b><p id="tipText"></p>
-        <button class="go" id="btnTipOk" type="button">알겠어요!</button>
-      </div>
-    </div>
-
     <div class="ov" id="ovStart">
       <div class="card">
         <p class="eyebrow">영어 읽기 슈팅 게임 · 버전 3 (폰)</p>
@@ -441,7 +426,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.33 · built 2026-10-06 12:52 (EST)</p>
+        <p class="ver" id="ver">v3.34 · built 2026-10-06 13:37 (EST)</p>
       </div>
     </div>
 
@@ -530,7 +515,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.33 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.34 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -1837,7 +1822,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     2: { hp: 1.9, def: 0.10, cnt: 1.3, maxN: 32, sp: 1.25, fi: 0.82, fdef: 0.55, name: '매우 어려움' }
   };
   var FINAL_HP = 22000;
-  var GOAL_FIRST = 400, GOAL_STEP = 900, SECS_PER_ROUND = 30, GOAL_MAX = 30000, confirmOpen = false, tipOpen = false, tipObj = null, roundOpen = false, panelOpen = false, panelPrev = '', drag = null, launching = false;
+  var GOAL_FIRST = 400, GOAL_STEP = 900, SECS_PER_ROUND = 30, GOAL_MAX = 30000, confirmOpen = false, roundOpen = false, panelOpen = false, panelPrev = '', drag = null, launching = false;
   /* ---------- background zones: 0 ground, 1 sea, 2 sky, 3 space ---------- */
   var BG = { p: 0, scr: 0, kind: 0 };
   var ZONES = ['지상', '바다', '하늘', '우주'];
@@ -2124,7 +2109,6 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (micStream) micStream.getTracks().forEach(function (t) { t.stop(); });
     micStream = null; micTrack = null;
   }
-  function preflightMic() { if (!SR || micAsk === 'off') return; openMic(null); }
 
   var PART_WAIT = 3000; // ms to wait for the rest of a sentence after a mid-sentence pause
   function clearPart() { if (voice.partTimer) { clearTimeout(voice.partTimer); voice.partTimer = null; } voice.part = ''; voice.partSel = -1; }
@@ -2785,7 +2769,6 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       el.style.setProperty('--tail', clamp(ox - left, 18, bw - 18) + 'px');
     });
   }
-  function closeTip() { if (!tipOpen) return; tipOpen = false; tipObj = null; $('tip').hidden = true; }
   /* a boss plus its escorts */
   function bossQueue(kind, w, bw) {
     var q = [{ t: 0.5, type: 'boss', kind: kind, bw: bw }], T = diffT();
@@ -2879,7 +2862,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     e.age += dt;
     if (e.flash > 0) e.flash -= dt;
     if (e.leaving) { e.y -= 240 * dt; if (e.y < -110) { e.dead = true; } }
-    else if (e.y < e.ty) e.y = Math.min(e.ty, e.y + (G.replay && e.arrSpd ? e.arrSpd : (e.summoned ? 170 : e.type === 'boss' ? 55 : 120)) * dt);
+    else if (e.y < e.ty) e.y = Math.min(e.ty, e.y + (e.arrSpd || (e.summoned ? 170 : e.type === 'boss' ? 55 : 120)) * dt);
     else e.arrived = true;
     e.x = e.ox + Math.sin(e.age * (e.type === 'boss' ? 0.5 : e.type === 'swarm' ? 1.5 : 0.9) + e.ph) * e.amp;
     if (e.parent) e.x = e.parent.x + e.slot;
@@ -2904,7 +2887,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       var phase = Math.floor(e.age / 4) % (e.final ? 6 : T >= 6 ? 4 : 3);
       /* unique attacks: first one 2 s after the boss has arrived, then exactly every 6 s (2 s, 8 s, 14 s ...) */
       var spFire = false;
-      if (!e.final) { if (e.spT == null) e.spT = e.summoned ? 0.3 : 2; e.spT -= dt; if (e.spT <= 0) { e.spT = G.replay ? 99 : e.spT + 6; spFire = true; } }
+      if (!e.final) { if (e.spT == null) e.spT = e.summoned ? 0.3 : 2; e.spT -= dt; if (e.spT <= 0) { e.spT = e.spOnce ? 99 : e.spT + 6; spFire = true; } }
       if (!e.final && e.skin === 0) {
         /* mecha beetle: it rolls up a big clod of earth and hurls it at the plane */
         if (e.clodW > 0) {
@@ -2949,7 +2932,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
           }
         }
       }
-      if (e.final && !G.replay) {
+      if (e.final && !e.noSummon) {
         /* galactic tyrant: every 7 s it calls a random boss to its head; at most two stay (a third sends the oldest back up) */
         e.sumT -= dt;
         if (e.sumT <= 0) {
@@ -3037,7 +3020,6 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     }
   }
   function update(dt) {
-    if (tipOpen) return;
     if (G.replay && G.replay.phase === 'done') { updateReplayDone(dt); return; }
     var sp = 320;
     if (keys.ArrowLeft) G.tx -= sp * dt;
@@ -4062,7 +4044,6 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     G.turrets.forEach(drawTurret);
     G.enemies.forEach(drawEnemy);
     G.items.forEach(function (it) { if (it.kind === 'heart') drawHeartItem(it); else drawStar(it); });
-    if (tipOpen && tipObj) { var hp = 1 + Math.sin(performance.now() / 160) * 0.12; ctx.save(); ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.arc(tipObj.x, tipObj.y, 38 * hp, 0, TAU); ctx.stroke(); ctx.restore(); }
     G.ships.forEach(drawShip);
     if (mode !== 'menu') drawBombs();
 
@@ -4180,7 +4161,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     else if (mode === 'menu') { bgT += dt; G.time += dt; G.px = W / 2 + Math.sin(bgT * 1.2) * 60; G.py = H - 110 + Math.sin(bgT * 2) * 6; }
     else if (mode === 'over') { if (G.replay) update(dt); else updateFx(dt); bgT += dt; }
     updateFollow();
-    drawAll(mode === 'pause' || (mode === 'play' && (roundOpen || tipOpen)) ? 0 : dt);
+    drawAll(mode === 'pause' || (mode === 'play' && roundOpen) ? 0 : dt);
     requestAnimationFrame(frame);
   }
   /* the game freezes by itself and the three sentences slide up */
@@ -4227,7 +4208,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     hudKey = ''; wpKey = ''; pnameKey = -1; clockKey = -1;
     $('hudline').hidden = false; $('hudTime').textContent = '0:00.0';
     mode = 'play';
-    roundOpen = false; panelOpen = false; drag = null; confirmOpen = false; tipOpen = false; $('tip').hidden = true; $('ovConfirm').hidden = true;
+    roundOpen = false; panelOpen = false; drag = null; confirmOpen = false; $('ovConfirm').hidden = true;
     voice.manual = false;
     $('sheet').hidden = true; showSay(false);
     $('ovStart').hidden = true; $('ovOver').hidden = true; $('ovPause').hidden = true; $('ovPanel').hidden = true; $('ovVol').hidden = true;
@@ -4310,12 +4291,15 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   function fmtTime1(sec) { var t = Math.floor(sec * 10), m = Math.floor(t / 600), r = (t % 600) / 10; return m + ':' + (r < 10 ? '0' : '') + r.toFixed(1); }
   var clockKey = -1;
   function updateClock() { var k = Math.floor(G.clock * 10); if (k !== clockKey) { clockKey = k; $('hudTime').textContent = fmtTime1(G.clock); } }
-  function fmtTime(sec) { var m = Math.floor(sec / 60), r = Math.floor(sec % 60); return m + ':' + (r < 10 ? '0' : '') + r; }
   /* ---------- ending replay: the upgraded plane beats each boss again behind the result card ---------- */
+  /* ===== ENDING REPLAY — 조건 모음 =====
+     보스 개별 조건은 엔티티 플래그: e.arrSpd(등장 속도) · e.spOnce(고유공격 1회) · e.noSummon(소환 안 함) · e.deco/e.defeated(최종 장면)
+     전역 조건은 G.replay 로 분기: announce/kill/hit(무시) · clock/ending(정지) · update(updateReplay/Done) ·
+       배경(bgTarget) · 보스바 숨김 · 비행기 불꽃 · 빔 그리기(done일 때 생략) · frame(mode==='over'에서도 update) */
   function replayBoss(i) {
     if (i < 4) spawnEnemy('boss', { kind: i, bw: (i + 1) * 4 }); else spawnFinalBoss();
     var e = G.enemies[G.enemies.length - 1];
-    e.hp = e.maxHp = 1e7; e.def = 0; e.replayKind = i; e.fireT = 1.2; e.spT = 0.5; e.arrSpd = (e.ty - e.y) / 1.5; G.replay.zone = i < 4 ? i : 3;
+    e.hp = e.maxHp = 1e7; e.def = 0; e.replayKind = i; e.fireT = 1.2; e.spT = 0.5; e.spOnce = true; e.noSummon = true; e.arrSpd = (e.ty - e.y) / 1.5; G.replay.zone = i < 4 ? i : 3;
     G.replay.cur = e; G.replay.t = 0; G.replay.phase = 'fight';
   }
   function startReplay() {
@@ -4465,14 +4449,14 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   var stage = $('stage');
   /* touch / pen: drag anywhere, the plane moves by the same amount (finger never hides it). mouse: the plane goes to the pointer. */
   function onDown(e) {
-    if (mode !== 'play' || roundOpen || tipOpen) return;
+    if (mode !== 'play' || roundOpen) return;
     if (e.target && e.target.closest && e.target.closest('.sheet,.ov')) return;
     if (e.pointerType === 'mouse') { var r = cv.getBoundingClientRect(); G.tx = (e.clientX - r.left) / r.width * W; G.ty = (e.clientY - r.top) / r.height * H; }
     else drag = { id: e.pointerId, x: e.clientX, y: e.clientY, tx: G.tx, ty: G.ty };
     try { stage.setPointerCapture(e.pointerId); } catch (err) {}
   }
   function onMove(e) {
-    if (mode !== 'play' || roundOpen || tipOpen) return;
+    if (mode !== 'play' || roundOpen) return;
     var r = cv.getBoundingClientRect();
     if (e.pointerType === 'mouse') { G.tx = (e.clientX - r.left) / r.width * W; G.ty = (e.clientY - r.top) / r.height * H; }
     else if (drag && drag.id === e.pointerId) {
@@ -4523,7 +4507,6 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     cancelSpeech(); speak('Hello! My name is Sunny.');
   });
   $('btnVoiceTest').addEventListener('click', function () { this.blur(); cancelSpeech(); speak('Look at the sky. I can fly high.'); });
-  $('btnTipOk').addEventListener('click', function () { this.blur(); closeTip(); });
   var TIPCHK = { turret: 'chkTipTurret', star: 'chkTipStar', heart: 'chkTipHeart' };
   function syncChecks() { TIPKINDS.forEach(function (k) { $(TIPCHK[k]).checked = !!tipOff[k]; }); $('chkSkip').checked = skipSpeak; }
   TIPKINDS.forEach(function (k) {
