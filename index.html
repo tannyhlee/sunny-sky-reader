@@ -261,6 +261,12 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
 .tipbub::after { content: ''; position: absolute; left: calc(var(--tail, 50%) - 10px); width: 18px; height: 18px; background: var(--panel); border: 2.5px solid var(--ui-edge); transform: rotate(45deg); }
 .tipbub.below::after { top: -11px; border-right: 0; border-bottom: 0; }
 .tipbub.above::after { bottom: -11px; border-left: 0; border-top: 0; }
+.fbub { position: absolute; z-index: 6; width: 190px; pointer-events: none; background: var(--panel); color: var(--fg); border: 2.5px solid var(--ui-edge); border-radius: 14px; padding: 7px 10px; box-shadow: 0 4px 14px rgba(0,0,0,0.35); }
+.fbub::after { content: ''; position: absolute; left: calc(var(--tail, 50%) - 8px); width: 14px; height: 14px; background: var(--panel); border: 2.5px solid var(--ui-edge); transform: rotate(45deg); }
+.fbub.below::after { top: -9px; border-right: 0; border-bottom: 0; }
+.fbub.above::after { bottom: -9px; border-left: 0; border-top: 0; }
+.fbub b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 1rem; }
+.fbub p { margin: 2px 0 0; font-size: 0.82rem; line-height: 1.3; }
 .tipbub b { font-family: var(--font-display); font-weight: 400; font-size: 1.15rem; }
 .tipbub p { margin: 0; font-size: 0.95rem; }
 .tipbub .go { font-size: 1rem; padding: 0.5em 0.9em; }
@@ -408,6 +414,10 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     <div class="hudline" id="hudline" hidden><span></span><span id="hudWave">WAVE 1</span><span id="hudTime">0:00.0</span></div>
     <div class="toast" id="toast" aria-live="polite"><div class="en"></div><div class="sub"></div></div>
 
+    <div class="fbub" id="fb_turret" hidden><b></b><p></p></div>
+    <div class="fbub" id="fb_star" hidden><b></b><p></p></div>
+    <div class="fbub" id="fb_heart" hidden><b></b><p></p></div>
+
     <div class="tip" id="tip" hidden>
       <div class="tipbub" id="tipBub" role="dialog" aria-live="polite">
         <b id="tipTitle"></b><p id="tipText"></p>
@@ -431,7 +441,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.31 · built 2026-10-05 17:41 (EST)</p>
+        <p class="ver" id="ver">v3.33 · built 2026-10-06 12:52 (EST)</p>
       </div>
     </div>
 
@@ -520,7 +530,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.31 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.33 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -556,7 +566,9 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </ul>
         <p style="margin-top:8px;font-size:0.82rem;color:var(--soft)">무기는 처음에 고른 <b>두 종류</b>만 키울 수 있어요. 위쪽 칸에 현재 무기와 레벨이 보여요.</p>
       </section>
-      <label class="chk"><input type="checkbox" id="chkTips"><span>💬 처음 설명을 다시 보여줄게요</span></label>
+      <label class="chk"><input type="checkbox" id="chkTipTurret"><span>⚠ 고정포탑 설명을 게임 내 표시하지 않음</span></label>
+      <label class="chk"><input type="checkbox" id="chkTipStar"><span>⭐ 별 설명을 게임 내 표시하지 않음</span></label>
+      <label class="chk"><input type="checkbox" id="chkTipHeart"><span>❤️ 하트 설명을 게임 내 표시하지 않음</span></label>
       <label class="chk"><input type="checkbox" id="chkSkip"><span>🤫 말하지 않고 넘어갈게요 <small>(문장을 읽어주지도, 마이크로 듣지도 않고 "확인했어요" 버튼으로 통과해요)</small></span></label>
       <div class="pwrow"><input type="password" id="skipPw" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="12" placeholder="비밀번호" aria-label="비밀번호"><span id="skipMsg" role="status"></span></div>
       <button class="go pclose-wide" id="btnPanelClose2">닫고 계속하기</button>
@@ -2717,6 +2729,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   var PHASE_NAMES = ['회전 탄막', '5연발 조준', '소용돌이 연사', '쌍포 난사', '쌍방향 소용돌이', '전방위 폭풍'];
   function spawnEnemy(type, it) {
     if (type === 'star') { G.items.push({ x: 50 + Math.random() * (W - 100), y: -30, ph: Math.random() * 6, age: 0 }); return; }
+    if (type === 'heart') { G.items.push({ kind: 'heart', x: 50 + Math.random() * (W - 100), y: -30, ph: Math.random() * 6, age: 0 }); return; }
     if (type === 'turret') { G.turrets.push({ x: 40 + Math.random() * (W - 80), y: -40, r: 20, age: 0, dead: false }); return; }
     var d = ED[type], hp = d.hp * hpF() * DIFFS[dl].hp;
     if (type === 'boss') hp = d.hp * (1 + G.bosses * 0.35) * hpF() * DIFFS[dl].hp * 0.5;
@@ -2734,29 +2747,43 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   }
   var EARLY_WAVES = 8; /* waves 1-8 = up to and including the 2nd boss wave */
   var TIPS = {
-    turret: ['고정포탑', '제거할 수 없어요! 비행기가 부딪히면 체력이 한 칸 줄어요. 가까이 가면 붉은 빛이 나타나고, 그 안에서는 비행기가 40% 속도로 느려져요.'],
-    star: ['특별한 별이 떴어요!', '먹어보세요! 별을 먹으면 바로 업그레이드 문장이 나와요.']
+    turret: ['고정포탑', '부수지 못해요! 부딪히면 체력이 한 칸 줄고, 가까이 가면 내 속도가 40%로 느려져요.'],
+    star: ['특별한 별이 떴어요!', '먹어보세요! 별을 먹으면 바로 업그레이드 문장이 나와요.'],
+    heart: ['하트가 떴어요!', '먹어보세요! 하트를 먹으면 체력이 한 칸 올라가요.']
   };
-  var tipSeen = {};
-  try { tipSeen = JSON.parse(localStorage.getItem('sunnySkyV3Tips') || '{}') || {}; } catch (e) {}
+  /* explanation bubbles: shown once per game, stuck to the first turret / star / heart and moving with it (the game never pauses); each kind can be turned off in the control panel */
+  var tipOff = {};
+  try { tipOff = JSON.parse(localStorage.getItem('sunnySkyV3TipOff') || '{}') || {}; } catch (e) {}
+  var TIPKINDS = ['turret', 'star', 'heart'], TIPICON = { turret: '⚠ ', star: '⭐ ', heart: '❤️ ' };
   function maybeTip() {
-    if (tipOpen || roundOpen || G.ending) return;
-    var kind = null, obj = null;
-    if (!tipSeen.turret) { G.turrets.forEach(function (t) { if (!obj && t.y > 30) { kind = 'turret'; obj = t; } }); }
-    if (!obj && !tipSeen.star) { G.items.forEach(function (it) { if (!obj && it.y > 30) { kind = 'star'; obj = it; } }); }
-    if (!obj) return;
-    tipSeen[kind] = 1; try { localStorage.setItem('sunnySkyV3Tips', JSON.stringify(tipSeen)); } catch (e) {}
-    tipOpen = true; tipObj = obj; keys = {}; drag = null;
-    $('tipTitle').textContent = (kind === 'star' ? '⭐ ' : '⚠ ') + TIPS[kind][0]; $('tipText').textContent = TIPS[kind][1];
-    $('tip').hidden = false;
-    var bub = $('tipBub'), sr = $('stage').getBoundingClientRect(), r = cv.getBoundingClientRect();
-    var bw = Math.min(300, sr.width - 24); bub.style.width = bw + 'px';
-    var ox = r.left - sr.left + obj.x / W * r.width, oy = r.top - sr.top + obj.y / H * r.height;
-    var left = clamp(ox - bw / 2, 12, sr.width - bw - 12), bh = bub.offsetHeight, below = oy + 48 + bh < sr.height - 8;
-    bub.style.left = left + 'px'; bub.style.top = (below ? oy + 48 : Math.max(8, oy - 48 - bh)) + 'px';
-    bub.classList.toggle('below', below); bub.classList.toggle('above', !below);
-    bub.style.setProperty('--tail', clamp(ox - left, 22, bw - 22) + 'px');
-    tone(700, 0.12, 'triangle', 0.05);
+    if (G.ending) return;
+    if (!G.fTip) G.fTip = {};
+    TIPKINDS.forEach(function (kind) {
+      if (tipOff[kind] || G.fTip[kind]) return;
+      var obj = null;
+      if (kind === 'turret') G.turrets.forEach(function (t) { if (!obj && !t.dead && t.y > 30) obj = t; });
+      else G.items.forEach(function (it) { if (!obj && !it.dead && it.y > 30 && (it.kind === 'heart') === (kind === 'heart')) obj = it; });
+      if (!obj) return;
+      G.fTip[kind] = { obj: obj };
+      var el = $('fb_' + kind);
+      el.querySelector('b').textContent = TIPICON[kind] + TIPS[kind][0]; el.querySelector('p').textContent = TIPS[kind][1];
+    });
+  }
+  function updateFollow() {
+    var sr = null, r = null, f = G.fTip;
+    TIPKINDS.forEach(function (kind) {
+      var el = $('fb_' + kind), t = f && f[kind], obj = t && t.obj;
+      var show = !!obj && !tipOff[kind] && mode === 'play' && !roundOpen && !panelOpen && !confirmOpen && !G.ending;
+      if (obj && (obj.dead || obj.y > H + 30)) { f[kind] = { done: true }; obj = null; show = false; }
+      if (!show) { if (!el.hidden) el.hidden = true; return; }
+      if (!sr) { sr = $('stage').getBoundingClientRect(); r = cv.getBoundingClientRect(); }
+      el.hidden = false;
+      var bw = Math.min(190, sr.width - 24), ox = r.left - sr.left + obj.x / W * r.width, oy = r.top - sr.top + obj.y / H * r.height;
+      var left = clamp(ox - bw / 2, 8, sr.width - bw - 8), bh = el.offsetHeight, below = oy < sr.height * 0.55;
+      el.style.width = bw + 'px'; el.style.left = left + 'px'; el.style.top = (below ? oy + 30 : oy - 30 - bh) + 'px';
+      el.classList.toggle('below', below); el.classList.toggle('above', !below);
+      el.style.setProperty('--tail', clamp(ox - left, 18, bw - 18) + 'px');
+    });
   }
   function closeTip() { if (!tipOpen) return; tipOpen = false; tipObj = null; $('tip').hidden = true; }
   /* a boss plus its escorts */
@@ -2796,6 +2823,10 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     /* waves 1-12: 40% chance; after wave 12: 1/3 chance, but at least one star in every 3 waves is guaranteed */
     var sinceStar = w - (G.lastStar || 0);
     if (Math.random() < (w <= 12 ? 0.4 : 1 / 3) || (w > 12 && sinceStar >= 3)) { q.push({ t: 3 + Math.random() * Math.max(4, span - 3), type: 'star' }); G.lastStar = w; }
+    /* a heart (+1 health): 25% per wave; every block of 4 waves (boss wave = the 4th) gets one for sure if none came yet; never once both weapons are Lv10 (repair menu exists) */
+    var hb = Math.floor((w - 1) / 4);
+    if (G.hBlock !== hb) { G.hBlock = hb; G.hGot = false; }
+    if (!allMax() && (Math.random() < 0.25 || (w % 4 === 0 && !G.hGot))) { q.push({ t: 3 + Math.random() * Math.max(4, span - 3), type: 'heart' }); G.hGot = true; }
     q.sort(function (a, b) { return a.t - b.t; });
     G.spawnQ = q;
     updateHUD();
@@ -3086,7 +3117,13 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       if (it.y > H + 40) { it.dead = true; return; }
       var ix = it.x - G.px, iy = it.y - G.py;
       if (ix * ix + iy * iy < 34 * 34 && !roundOpen && !G.ending) {
-        it.dead = true; G.bonus = true; sfx('level'); burst(it.x, it.y, 22, '#ffe066', 240);
+        it.dead = true;
+        if (it.kind === 'heart') {
+          sfx('level'); burst(it.x, it.y, 22, '#ff7aa8', 240);
+          if (G.hp < G.maxHp) { G.hp++; pop(G.px, G.py - 40, '+ ♥', '#ff5c8a'); updateHUD(); } else pop(G.px, G.py - 40, '체력 가득!', '#ff5c8a');
+          return;
+        }
+        G.bonus = true; sfx('level'); burst(it.x, it.y, 22, '#ffe066', 240);
         announce('SHINING STAR!', '별을 잡았어요! 문장을 읽으면 바로 업그레이드!');
         openRound();
       }
@@ -3324,6 +3361,17 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     ctx.beginPath(); ctx.rect(22, -6.5, 6, 13); ctx.fillStyle = '#8791a8'; ctx.fill(); ctx.stroke();
     ctx.restore();
     ctx.beginPath(); ctx.arc(0, 0, 6, 0, TAU); ctx.fillStyle = (Math.floor(G.time * 3) % 2) ? C.coral : '#ffb3a8'; ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+  function drawHeartItem(it) {
+    var pul = 1 + Math.sin(G.time * 7 + it.ph) * 0.12, R = 15 * pul;
+    ctx.save(); ctx.translate(it.x, it.y);
+    var g = ctx.createRadialGradient(0, 0, 4, 0, 0, 44); g.addColorStop(0, 'rgba(255,150,190,0.85)'); g.addColorStop(1, 'rgba(255,110,160,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 44, 0, TAU); ctx.fill();
+    ctx.rotate(Math.sin(G.time * 2 + it.ph) * 0.2);
+    ctx.beginPath(); ctx.moveTo(0, R * 0.95); ctx.bezierCurveTo(-R * 1.5, R * 0.1, -R * 0.95, -R * 1.05, 0, -R * 0.38); ctx.bezierCurveTo(R * 0.95, -R * 1.05, R * 1.5, R * 0.1, 0, R * 0.95); ctx.closePath();
+    ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.strokeStyle = C.outline; ctx.fillStyle = '#ff4d79'; ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.beginPath(); ctx.arc(-R * 0.45, -R * 0.35, 3, 0, TAU); ctx.fill();
     ctx.restore();
   }
   function drawStar(it) {
@@ -4013,7 +4061,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (mode !== 'menu') drawFires();
     G.turrets.forEach(drawTurret);
     G.enemies.forEach(drawEnemy);
-    G.items.forEach(drawStar);
+    G.items.forEach(function (it) { if (it.kind === 'heart') drawHeartItem(it); else drawStar(it); });
     if (tipOpen && tipObj) { var hp = 1 + Math.sin(performance.now() / 160) * 0.12; ctx.save(); ctx.lineWidth = 4; ctx.strokeStyle = '#fff'; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.arc(tipObj.x, tipObj.y, 38 * hp, 0, TAU); ctx.stroke(); ctx.restore(); }
     G.ships.forEach(drawShip);
     if (mode !== 'menu') drawBombs();
@@ -4131,6 +4179,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (mode === 'play') { update(dt); bgT += dt; updateHUD(); updateClock(); }
     else if (mode === 'menu') { bgT += dt; G.time += dt; G.px = W / 2 + Math.sin(bgT * 1.2) * 60; G.py = H - 110 + Math.sin(bgT * 2) * 6; }
     else if (mode === 'over') { if (G.replay) update(dt); else updateFx(dt); bgT += dt; }
+    updateFollow();
     drawAll(mode === 'pause' || (mode === 'play' && (roundOpen || tipOpen)) ? 0 : dt);
     requestAnimationFrame(frame);
   }
@@ -4475,10 +4524,13 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   });
   $('btnVoiceTest').addEventListener('click', function () { this.blur(); cancelSpeech(); speak('Look at the sky. I can fly high.'); });
   $('btnTipOk').addEventListener('click', function () { this.blur(); closeTip(); });
-  function syncChecks() { $('chkTips').checked = !(tipSeen.turret && tipSeen.star); $('chkSkip').checked = skipSpeak; }
-  $('chkTips').addEventListener('change', function () {
-    tipSeen = this.checked ? {} : { turret: 1, star: 1 };
-    try { localStorage.setItem('sunnySkyV3Tips', JSON.stringify(tipSeen)); } catch (e) {}
+  var TIPCHK = { turret: 'chkTipTurret', star: 'chkTipStar', heart: 'chkTipHeart' };
+  function syncChecks() { TIPKINDS.forEach(function (k) { $(TIPCHK[k]).checked = !!tipOff[k]; }); $('chkSkip').checked = skipSpeak; }
+  TIPKINDS.forEach(function (k) {
+    $(TIPCHK[k]).addEventListener('change', function () {
+      tipOff[k] = this.checked ? 1 : 0;
+      try { localStorage.setItem('sunnySkyV3TipOff', JSON.stringify(tipOff)); } catch (e) {}
+    });
   });
   function skipUi() {
     $('chkSkip').disabled = skipLocked; $('skipPw').disabled = skipLocked;
