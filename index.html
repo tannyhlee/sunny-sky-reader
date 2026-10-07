@@ -417,7 +417,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.35 · built 2026-10-06 21:42 (EST)</p>
+        <p class="ver" id="ver">v3.37 · built 2026-10-06 22:48 (EST)</p>
       </div>
     </div>
 
@@ -506,7 +506,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.35 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.37 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -1737,15 +1737,15 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   var ORB_DPS = [52, 68, 86, 108, 135];
   /* 4 Drones: Lv1-5 hover at a fixed distance, Lv6+ fly around by themselves */
   var W4 = { n: [1, 2, 3, 4, 5, 6, 7, 8, 9, 5], dmg: [2.5, 2.8, 3.3, 3.8, 4.5, 6.3, 7.5, 8.8, 10.6, 12.5],
-             iv: [0.70, 0.66, 0.62, 0.58, 0.50, 0.50, 0.46, 0.42, 0.38, 0.34] };
+             iv: [0.80, 0.76, 0.72, 0.68, 0.64, 0.60, 0.56, 0.52, 0.48, 0.44] };
   /* 5 Mothership: size grows Lv1-5, attacks from Lv6 */
   var W5 = { w: [120, 170, 230, 310, 400, 440, 470, 480, 480, 480], h: [46, 52, 58, 66, 76, 84, 92, 100, 110, 124],
              contact: [0, 0, 0, 0, 0, 80, 110, 150, 200, 260] };
 
   /* 8 Incendiary bomb (Lv1-5, one-shot blast, 1..5 bombs) -> Napalm bomb (Lv6-10, 5 bombs, burning ground) */
-  var W8 = { n: [1, 2, 3, 4, 5, 5, 5, 5, 5, 5], iv: 2.5, speed: 230,
-             dmg: [5.5, 7, 8.5, 10, 11.5], R1: 42,
-             R: [48, 50.4, 52.8, 55.2, 57.6], dur: [0.7, 0.8, 0.9, 1.0, 1.2], dps: [32, 35, 39, 43, 49] };
+  var W8 = { n: [1, 2, 3, 4, 5, 5, 5, 5, 5, 5], iv: [2.2, 2.2, 2.2, 2.2, 2.2, 2.1, 2.0, 1.9, 1.8, 1.5], speed: 230,
+             dmg: [11, 14, 17, 20, 23], R1: 42,
+             R: [48, 50.4, 52.8, 55.2, 57.6], dur: [0.7, 0.8, 0.9, 1.0, 1.2], dps: [64, 70, 78, 86, 98] };
   function desc(t, L) {
     if (t === 8) {
       if (L <= 5) return (L === 1 ? '폭발탄 (Explosive Bomb)' : '폭발탄') + ' ' + W8.n[L - 1] + '개를 부채꼴로 던져요 · 적까지의 거리에서 한 번 폭발 · 위력 ' + W8.dmg[L - 1];
@@ -2336,7 +2336,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     /* 8: incendiary / napalm bombs */
     if (G.lv[8]) {
       G.t8 -= dt;
-      if (G.t8 <= 0) { G.t8 = (G.lv[8] === 10 ? W8.iv - 0.26 : W8.iv) / (MOD.rate[8] || 1); launchBombs(G.lv[8]); }
+      if (G.t8 <= 0) { G.t8 = W8.iv[G.lv[8] - 1] / (MOD.rate[8] || 1); launchBombs(G.lv[8]); }
     }
     /* 1: bullets */
     var L = G.lv[1];
