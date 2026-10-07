@@ -150,10 +150,10 @@ h1 small { font-family: var(--font-type); font-size: 0.7rem; font-weight: 700; l
 .chk small { display: block; font-weight: 400; color: var(--soft); font-size: 0.8rem; margin-top: 2px; }
 .ov.ending { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .ov.ending { padding-top: 0; padding-bottom: 0; flex-direction: column; overflow: hidden; }
-.ov.ending::before { content: ''; flex: 2 1 0; min-height: 0; }
-.ov.ending::after { content: ''; flex: 1 1 0; min-height: 0; }
+.ov.ending::before { content: ''; flex: 0 0 calc(20% - 6.5vw); min-height: 0; }
+.ov.ending::after { content: ''; flex: 0 0 9.6%; min-height: 0; }
 .ov.ending .card { background: color-mix(in srgb, var(--panel) 40%, transparent); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); transition: background-color 0.25s;
-  flex: 7 1 0; min-height: 0; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; overflow: hidden; }
+  flex: 1 1 0; min-height: 0; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; overflow: hidden; }
 .ov.ending .card.solid { background: color-mix(in srgb, var(--panel) 58%, transparent); }
 .ov.ending .card h2 { font-size: clamp(1.25rem, 6vw, 1.7rem); white-space: nowrap; }
 .ov.ending .stats { gap: 5px; }
@@ -283,7 +283,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   height: 100vh; height: 100dvh; background: var(--bg);
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
-.top { flex: none; padding: 6px 8px 5px; display: grid; gap: 4px; background: var(--panel); border-bottom: 2px solid var(--ui-edge); }
+.top { flex: none; padding: 6px 8px 5px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; background: var(--panel); border-bottom: 2px solid var(--ui-edge); }
 .r1, .r2 { display: flex; align-items: center; gap: 5px; min-width: 0; }
 .r1 { min-height: 40px; }
 .hearts { flex: none; }
@@ -291,9 +291,9 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
 .hearts { gap: 2px; }
 .hearts .hp0 { font-size: 16px; }
 .pchip {
-  flex: 1 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px;
+  flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px;
   border: 1.5px solid var(--wc7); background: color-mix(in srgb, var(--wc7) 14%, transparent); color: var(--fg);
-  font-family: var(--font-type); font-weight: 700; font-size: 0.74rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: max-content;
+  font-family: var(--font-type); font-weight: 700; font-size: 0.7rem; line-height: 1.2; white-space: nowrap;
 }
 .pchip.flash { animation: chipFlash 2.4s ease-out; }
 @keyframes chipFlash { 0%, 60% { background: var(--sun); transform: scale(1.12); } 100% { transform: scale(1); } }
@@ -302,6 +302,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
   flex: none; width: 38px; height: 40px; border-radius: 12px; border: 2px solid var(--ui-edge); background: var(--panel); color: var(--fg);
   font-size: 1.2rem; line-height: 1; display: grid; place-items: center; cursor: pointer; padding: 0; touch-action: manipulation;
 }
+.sp + .ibtn + .ibtn, .sp + .ibtn + .ibtn + .ibtn { margin-left: -3px; }
+.hearts.many { gap: 1px; }
+.ibtn { width: 34px; }
+.r1:has(.hearts.many) .pchip > span:first-child { display: none; }
+@media (max-width: 380px) { .hearts.many .hh { width: 16px; height: 16px; } .pchip { font-size: 0.66rem; padding: 3px 7px; } }
 .ibtn:active { background: color-mix(in srgb, var(--sun) 30%, var(--panel)); }
 .ibtn:disabled { opacity: 0.4; }
 .ibtn:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
@@ -417,7 +422,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.37 · built 2026-10-06 22:48 (EST)</p>
+        <p class="ver" id="ver">v3.39 · built 2026-10-06 23:31 (EST)</p>
       </div>
     </div>
 
@@ -506,7 +511,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.37 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.39 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -1868,7 +1873,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     for (var n = 0; n < G.maxHp; n++) h += HEART.replace('%c', n < G.hp ? 'full' : '');
     if (G.hp <= 0) h += '<b class="hp0" aria-hidden="true">0</b>';
     $('hearts').classList.toggle('last', G.hp <= 0);
-    $('hearts').innerHTML = h;
+    $('hearts').innerHTML = h; $('hearts').classList.toggle('many', G.maxHp > 5);
     $('hearts').setAttribute('aria-label', '남은 하트 ' + G.hp + '개');
     $('score').textContent = G.score.toLocaleString('en-US');
     $('goalBar').style.width = gp + '%';
@@ -2700,7 +2705,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     G.flash = 0.4; G.shake = 0.5; sfx('mother'); updateHUD();
   }
   /* one fixed boss per zone: wave 4 / 8 / 12 / 16 (then the cycle repeats) */
-  var BOSS_NAMES = ['메카 딱정벌레', '심해 문어왕', '번개 독수리', '외계 사령관'];
+  var BOSS_NAMES = ['흙 딱정벌레', '심해 문어왕', '번개 독수리', '외계 사령관'];
   var PHASE_NAMES = ['회전 탄막', '5연발 조준', '소용돌이 연사', '쌍포 난사', '쌍방향 소용돌이', '전방위 폭풍'];
   function spawnEnemy(type, it) {
     if (type === 'star') { G.items.push({ x: 50 + Math.random() * (W - 100), y: -30, ph: Math.random() * 6, age: 0 }); return; }
