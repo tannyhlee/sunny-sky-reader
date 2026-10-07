@@ -422,7 +422,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
         </div>
         <p class="seg-note" id="segNote"></p>
         <button class="go" id="btnStart">출발!</button>
-        <p class="ver" id="ver">v3.41 · built 2026-10-06 23:47 (EST)</p>
+        <p class="ver" id="ver">v3.42 · built 2026-10-07 00:04 (EST)</p>
       </div>
     </div>
 
@@ -511,7 +511,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       <h2>⚙ 제어판</h2>
       <section>
         <h3>게임 버전</h3>
-        <p><b>Sunny's Sky Reader · 버전 3.41 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
+        <p><b>Sunny's Sky Reader · 버전 3.42 (폰용)</b><br>V2(컴퓨터용)를 휴대폰 터치와 마이크로 하도록 바꾼 버전이에요.</p>
       </section>
       <section>
         <h3>게임 목적</h3>
@@ -2625,7 +2625,8 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
       m.t += dt;
       /* sails up from the bottom, parks at the lower quarter of the screen for 2.5 s, then leaves through the top */
       var stopY = H * 0.75;
-      if (m.phase === 0) { m.y -= m.spd * dt; if (m.y <= stopY) { m.y = stopY; m.phase = 1; m.hold = 0; } }
+      if (m.endShow) { m.y -= m.spd * dt; var fe = G.replay && G.replay.cur; if (fe && !fe.dead) m.x += (clamp(fe.x, m.w / 2, W - m.w / 2) - m.x) * Math.min(1, dt * 3); m.phase = 1; m.hold = 1; }
+      else if (m.phase === 0) { m.y -= m.spd * dt; if (m.y <= stopY) { m.y = stopY; m.phase = 1; m.hold = 0; } }
       else if (m.phase === 1) { m.hold += dt; if (m.hold >= 2.5) m.phase = 2; }
       else { m.y -= m.spd * dt; if (m.y < -m.h * 0.8) m.done = true; }
       if (m.gt.length) runAsShip(m, dt);
@@ -2664,7 +2665,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
             }
           }
         }
-        if (m.L >= 9 && m.phase === 1 && m.hold > 0.55 && m.hold < 1.95) {
+        if (m.L >= 9 && (m.endShow || (m.phase === 1 && m.hold > 0.55 && m.hold < 1.95))) {
           var bw = m.L === 9 ? 80 : 150, dps = m.L === 9 ? 240 : 420;
           m.bT -= dt;
           if (m.bT <= 0) {
@@ -3069,7 +3070,11 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
 
     G.time += dt;
     if (G.inv > 0) G.inv -= dt;
-    if (G.shT > 0) G.shT -= dt;
+    if (G.shT > 0) {
+      G.shT -= dt;
+      /* the shield erases enemy missiles that touch it (same principle as the shield weapon) */
+      G.bullets.forEach(function (b) { if (!b.dead) { var sx = b.x - G.px, sy = b.y - G.py, sr = 34 + (b.r || 4); if (sx * sx + sy * sy < sr * sr) { b.dead = true; G.parts.push({ x: b.x, y: b.y, vx: rnd(-70, 70), vy: rnd(-70, 70), life: 0.3, max: 0.3, r: 2, col: '#bff0ff' }); } } });
+    }
 
     fireAll(dt);
     updateOrbs(dt);
@@ -4243,7 +4248,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     showSay(false);
     R.stage = 'none'; R.sel = -1; R.opts = [];
     if (!wasBonus) G.goalPrev = G.goal, G.goal = G.goal + nextStep(); /* surplus points carry over: several upgrades in a row if needed */
-    G.inv = Math.max(G.inv, 1.2);
+    G.inv = Math.max(G.inv, 1.2); G.shT = G.inv; G.shMax = G.inv; /* same shield as eating a heart */
     updateHUD();
   }
   function doStart() {
@@ -4345,6 +4350,13 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     var e = G.enemies[G.enemies.length - 1];
     e.hp = e.maxHp = 1e7; e.def = 0; e.replayKind = i; e.fireT = 1.2; e.spT = 0.5; e.spOnce = true; e.noSummon = true; e.arrSpd = (e.ty - e.y) / 1.5; G.replay.zone = i < 4 ? i : 3;
     G.replay.cur = e; G.replay.t = 0; G.replay.phase = 'fight';
+    if (i === 4) callEndShip(e);
+  }
+  /* Galactic Tyrant: the mothership (광역 공격) is called at once and sails up the whole 6 s without parking; it vanishes when the boss falls */
+  function callEndShip(e) {
+    launchShip(10);
+    var m = G.ships[G.ships.length - 1], goalY = e.ty + m.h * 0.45 + 24;
+    m.endShow = true; m.x = W / 2; m.spd = (m.y - goalY) / 5.6;
   }
   function startReplay() {
     G.replay = { i: 0, t: 0, phase: 'gap', wait: 0.5, cur: null, zone: 0 }; BG.p = 0;
@@ -4365,6 +4377,7 @@ body { margin: 0; padding: 0; overflow: hidden; overscroll-behavior: none; -webk
     if (r.t >= 4.5 || e.age > 12) {
       e.dead = true; G.bullets.length = 0; G.flash = 0.25; G.shake = 0.4; sfx('boom');
       for (var z = 0; z < 5; z++) burst(e.x + rnd(-50, 50), e.y + rnd(-35, 35), 36, z % 2 ? C.sun : '#fff', 340);
+      if (G.ships.length) { G.ships.forEach(function (m) { burst(m.x, m.y, 30, C.w5, 260); }); G.ships.length = 0; }
       r.i++;
       if (r.i >= 5) endTableau(); else { r.phase = 'gap'; r.wait = 0.2; }
     }
